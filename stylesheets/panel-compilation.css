@@ -1,0 +1,37 @@
+
+/* ================================================================
+         Compilation
+   ================================================================
+ */
+
+/* ----------------------------------------------------------------
+          Toolbar button
+   ----------------------------------------------------------------
+ */
+
+#toolbar-compilation {
+  background-color: transparent;
+  background-image: url("icon-compilation.svg");
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-clip: content-box;
+}
+#toolbar-compilation.selected {
+  background-position: -24px 0;
+}
+
+/* ----------------------------------------------------------------
+           Panel
+   ----------------------------------------------------------------
+ */
+#panel-compilation-zone {
+  overflow: auto;
+  padding: 2px;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  text-shadow: none;
+  outline-color: transparent;
+  outline-style: none;
+  font-size: 12px;
+}

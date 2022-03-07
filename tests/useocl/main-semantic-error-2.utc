@@ -1,0 +1,2 @@
+main-semantic-error-2.use:50:16: Undefined operation named `employee' in expression `Department.employee()'.
+main-semantic-error-2.use:60:27: Undefined operation named `employee' in expression `Department.employee()'.

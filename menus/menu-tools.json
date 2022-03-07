@@ -1,0 +1,25 @@
+{
+  "menu": [
+    {
+      "id": "tools",
+      "submenu": [
+        {
+          "label": "ModelScript",
+          "id": "tools.useocl",
+          "submenu": [
+            {
+              "label": "Generate",
+              "id": "tools.useocl.generate",
+              "command": "useocl:generate"
+            },
+            {
+              "label": "Beautify",
+              "id": "tools.useocl.beautify",
+              "command": "useocl:beautify"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

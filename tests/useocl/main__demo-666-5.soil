@@ -1,0 +1,9 @@
+                                                                    ?'@@@1'
+! x := new Employee('sophie')
+                                                                    ?'@@@2'
+check -v -d -a
+                                                                    ?'@@@3'
+! x := new Employee('mario')
+                                                                    ?'@@@4'
+check -d -a
+                                                                    ?'@@@5'

@@ -1,0 +1,28 @@
+-> '@@@1' : String
+-> '@@@2' : String
+-> '@@@3' : String
+-> '@@@4' : String
+-> '@@@5' : String
+-> '@@@6' : String
+Warning: Insert has resulted in two aggregates for object `Wheel1'. Object `Wheel1' is already component of another object.
+-> '@@@7' : String
+Warning: Insert has resulted in two aggregates for object `Wheel1'. Object `Wheel1' is already component of another object.
+Warning: Insert has resulted in two aggregates for object `Wheel1'. Object `Wheel1' is already component of another object.
+-> '@@@8' : String
+checking structure...
+Error: Object `Wheel1' is shared by object `Car1' and object `Car3'.
+Multiplicity constraint violation in association `HasWheel':
+  Object `Wheel1' of class `Wheel' is connected to 3 objects of class `Car'
+  at association end `car' but the multiplicity is specified as `1'.
+checked structure in 3ms.
+checking invariants...
+checked 0 invariants in 0.001s, 0 failures.
+-> '@@@9' : String
+checking structure...
+Error: Object `Wheel1' is shared by object `Car1' and object `Car3'.
+Multiplicity constraint violation in association `HasWheel':
+  Object `Wheel1' of class `Wheel' is connected to 3 objects of class `Car'
+  at association end `car' but the multiplicity is specified as `1'.
+checked structure in 1ms.
+checking invariants...
+checked 0 invariants in 0.001s, 0 failures.

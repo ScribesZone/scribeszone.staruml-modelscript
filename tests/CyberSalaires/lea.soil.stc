@@ -1,0 +1,62 @@
+-> '@1' : String
+-> '@2' : String
+-> '@3' : String
+<input>:line 1:0 no viable alternative at input 'm'
+-> '@4' : String
+-> '@5' : String
+-> '@6' : String
+<input>:1:0: Variable `mois' in expression `mois' is undefined.
+-> '@7' : String
+-> '@8' : String
+-> '@9' : String
+-> '@10' : String
+-> '@11' : String
+-> '@12' : String
+<input>:1:0: Variable `semaine' in expression `semaine' is undefined.
+-> '@13' : String
+Error: Cannot create an object of an abtract class!
+-> '@14' : String
+<input>:1:0: Variable `abe' in expression `abe' is undefined.
+-> '@15' : String
+<input>:1:0: Variable `abe' in expression `abe' is undefined.
+-> '@16' : String
+-> '@17' : String
+-> '@18' : String
+-> '@19' : String
+-> '@20' : String
+-> '@21' : String
+-> '@22' : String
+-> '@23' : String
+<input>:1:0: Variable `abe' in expression `abe' is undefined.
+-> '@24' : String
+<input>:1:0: Variable `abe' in expression `abe' is undefined.
+-> '@25' : String
+-> '@26' : String
+<input>:line 1:0 no viable alternative at input 'insert'
+-> '@27' : String
+checking structure...
+Multiplicity constraint violation in association `APourEmploi':
+  Object `pg' of class `CompagnieDExploitation' is connected to 0 objects of class `Personne'
+  at association end `employe' but the multiplicity is specified as `1..*'.
+Multiplicity constraint violation in association `EstEmploiDans':
+  Object `pg' of class `CompagnieDExploitation' is connected to 0 objects of class `Compagnie'
+  at association end `employeur' but the multiplicity is specified as `1'.
+Multiplicity constraint violation in association `EstEmploiDans':
+  Object `e1' of class `Emploi' is connected to 0 objects of class `Compagnie'
+  at association end `employeur' but the multiplicity is specified as `1'.
+checked structure in 10ms.
+checking invariants...
+checked 0 invariants in 0.003s, 0 failures.
+checking structure...
+Multiplicity constraint violation in association `APourEmploi':
+  Object `pg' of class `CompagnieDExploitation' is connected to 0 objects of class `Personne'
+  at association end `employe' but the multiplicity is specified as `1..*'.
+Multiplicity constraint violation in association `EstEmploiDans':
+  Object `pg' of class `CompagnieDExploitation' is connected to 0 objects of class `Compagnie'
+  at association end `employeur' but the multiplicity is specified as `1'.
+Multiplicity constraint violation in association `EstEmploiDans':
+  Object `e1' of class `Emploi' is connected to 0 objects of class `Compagnie'
+  at association end `employeur' but the multiplicity is specified as `1'.
+checked structure in 4ms.
+checking invariants...
+checked 0 invariants in 0.003s, 0 failures.

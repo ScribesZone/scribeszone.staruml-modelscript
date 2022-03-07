@@ -1,0 +1,14 @@
+[
+
+
+
+
+        {
+          "label": "DEMO: ELP - Show ElementListPanel",
+          "id": "view.toggle.demoelp",
+          "type": "checkbox",
+          "command": "demos:toggle.demoelp"
+        }
+
+
+]

@@ -1,0 +1,96 @@
+model M
+
+enum Periode {
+    semaine,
+    mois
+}
+
+class Block1
+end
+
+class Personne
+    attributes
+        age : Integer
+        nom : String
+end
+
+class ConstraintBlock1
+end
+
+class Compagnie
+    attributes
+        nom : String
+        ca : Integer
+        Attribute1 : Emploi
+end
+
+class CompagnieDExploitation < Compagnie, Emploi
+    attributes
+        rang : String
+end
+
+class Emploi < SuperTruc
+    attributes
+        salaire : Real
+        periode : Periode
+        attWithNoType : 
+end
+
+class Person
+end
+
+class Company
+end
+
+associationclass Employment
+    between
+        Person[] role employees
+        Company[] role 
+    attributes
+        salary : Integer
+end
+
+class SuperTruc
+end
+
+class  Bad class
+end
+
+class Class1
+end
+
+class Class1
+end
+
+class Departement
+end
+
+abstract class Class2
+    attributes
+        a : Intger
+end
+
+association APourEmploi
+    between
+        Personne[ab] role employe
+        Emploi[*] role emplois
+end
+
+association Dirige
+    between
+        Personne[*] role dirigeants
+        Compagnie[1..n] role compagniesDirigees
+end
+
+association EstEmploiDans
+    between
+        Emploi[*] role emplois
+        Compagnie[1] role employeur
+end
+
+composition HasDepartments
+    between
+        Company[1] role company
+        Departement[*] role departements
+end
+

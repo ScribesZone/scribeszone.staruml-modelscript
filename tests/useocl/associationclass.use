@@ -1,0 +1,15 @@
+model M
+
+class Monkey end
+class Snake end
+class Strange end
+
+associationclass Hate between // Hate < Strange is invalid
+    Monkey [*] role monkeys
+    Snake [*] role snakes
+attributes
+    reason : String
+    intensity : Integer
+operations
+    increase()
+end

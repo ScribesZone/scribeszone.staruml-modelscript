@@ -1,0 +1,53 @@
+-- state zoe
+
+! create x : Personne
+!     x.nom := 'xi'
+!     x.age := 26
+
+! create objectWithStringClassifier : ***ERROR*** String("JustAString")
+!     objectWithStringClassifier.age := 10
+!     objectWithStringClassifier.nom := "toto"
+!     objectWithStringClassifier.x := 23
+!     objectWithStringClassifier.Slot1 := 
+
+! create y : Personne
+!     y.e := 23
+!     y.g := 1°
+!     y.df := 
+!     y.e := lkfd
+
+! create lm : Personne
+!     lm.Slot1 := 
+!     lm. := 
+!     lm.Slot2 := Periode.semaine
+!     lm.a := 
+
+! create objectWithNoClassifier : ***ERROR*** null
+
+! create  : ***ERROR*** null
+
+! create leo : Fire
+
+! create BadName : ***ERROR*** String("BadType")
+!     BadName. := 
+
+! create  : ***ERROR*** String("badTypeName")
+
+! create test : ***ERROR*** String("AClass")
+!     test.number := 10
+!     test.number2 := -140
+!     test.pi := 3.14
+!     test.pi := -3.0
+!     test.name1 := 'test'
+!     test.name2 := 'test\'ok'
+!     test.bool1 := true
+!     test.booll2 := false
+!     test.nada1 := null
+!     test.nada2 := Undefined
+!     test.enum1 := Periode::semaine
+
+
+! insert(x,pg) into 
+! insert(x,abe) into Dirige
+
+check -v -d

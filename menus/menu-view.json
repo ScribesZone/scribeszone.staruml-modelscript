@@ -1,0 +1,18 @@
+{
+  "menu": [
+    {
+      "id": "view",
+      "submenu": [
+        {
+          "type": "separator"
+        },
+        {
+          "label": "USE OCL Console",
+          "id": "view.useocl.console",
+          "type": "checkbox",
+          "command": "useocl:toggle.console"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+model M
+
+actor Boss
+actor BigBoss
+actor President
+
+usecase Hire
+usecase Fire
+usecase Fire
+usecase UseCase1
+usecase DoSomething
+usecase some usecase
+
+interactions 
+    un Boss peut Fire
+    un Boss peut Hire
+    un BigBoss peut Fire
+    un President peut DoSomething
+    un President peut some usecase

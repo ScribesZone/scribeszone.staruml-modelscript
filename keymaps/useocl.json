@@ -1,0 +1,4 @@
+{
+  "ctrl-w": "useocl:generate",
+  "alt-w": "useocl:beautify"
+}

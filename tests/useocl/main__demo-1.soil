@@ -1,0 +1,45 @@
+                                                                    ?'@@@1'
+!computing := new Department
+                                                                    ?'@@@2'
+!computing.name := 'Computing departement'
+                                                                    ?'@@@3'
+!computing.location := 'Los alaambritos'
+                                                                    ?'@@@4'
+!computing.budget := 10000
+                                                                    ?'@@@5'
+!djamel := new Employee
+                                                                    ?'@@@6'
+!djamel.name := 'Djamel'
+                                                                    ?'@@@7'
+!djamel.salary := 2600
+                                                                    ?'@@@8'
+!insert (djamel, computing) into WorksIn
+                                                                    ?'@@@9'
+!ioannis := new Employee
+                                                                    ?'@@@10'
+!ioannis.name := 'Ioannis'
+                                                                    ?'@@@11'
+!ioannis.salary := 1900
+                                                                    ?'@@@12'
+!insert (ioannis, computing) into WorksIn
+                                                                    ?'@@@13'
+!turbo := new Project
+                                                                    ?'@@@14'
+!turbo.name := 'Maxi turbo project'
+                                                                    ?'@@@15'
+!turbo.budget := 5000
+                                                                    ?'@@@16'
+! c1 := new Control() between (computing, turbo)
+                                                                    ?'@@@17'
+! c1.frequence:=15
+                                                                    ?'@@@18'
+!sandrine := new Employee
+                                                                    ?'@@@19'
+!sandrine.name := 'Sandrine'
+                                                                    ?'@@@20'
+!sandrine.salary := 2000
+                                                                    ?'@@@21'
+!insert (sandrine, computing) into WorksIn
+                                                                    ?'@@@22'
+!sandrine.salary := 2600
+                                                                    ?'@@@23'

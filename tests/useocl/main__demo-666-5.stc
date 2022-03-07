@@ -1,0 +1,66 @@
+-> '@@@1' : String
+-> '@@@2' : String
+checking structure...
+Multiplicity constraint violation in association `WorksIn':
+  Object `sophie' of class `Employee' is connected to 0 objects of class `Department'
+  at association end `departments' but the multiplicity is specified as `1..*'.
+checked structure in 2ms.
+checking invariants...
+checking invariant (1) `Department::i1a': OK.
+checking invariant (2) `Department::i2': OK.
+checking invariant (3) `Employee::i1b': FAILED.
+  -> false : Boolean
+Results of subexpressions:
+  Employee.allInstances : Set(Employee) = Set{sophie}
+  self : Employee = sophie
+  self.salary : OclVoid = null
+  (self.salary >= 0) : OclVoid = null
+  Employee.allInstances->forAll(self : Employee | (self.salary >= 0)) : Boolean = false
+Instances of Employee violating the invariant:
+  -> Set{sophie} : Set(Employee)
+checking invariant (4) `Employee::i3': OK.
+checking invariant (5) `Project::i1c': OK.
+checking invariant (6) `Project::i4': OK.
+checking invariant (7) `Project::i5': OK.
+checked 7 invariants in 0.005s, 1 failure.
+-> '@@@3' : String
+-> '@@@4' : String
+checking structure...
+Multiplicity constraint violation in association `WorksIn':
+  Object `mario' of class `Employee' is connected to 0 objects of class `Department'
+  at association end `departments' but the multiplicity is specified as `1..*'.
+Multiplicity constraint violation in association `WorksIn':
+  Object `sophie' of class `Employee' is connected to 0 objects of class `Department'
+  at association end `departments' but the multiplicity is specified as `1..*'.
+checked structure in 1ms.
+checking invariants...
+checking invariant (1) `Department::i1a': OK.
+checking invariant (2) `Department::i2': OK.
+checking invariant (3) `Employee::i1b': FAILED.
+  -> false : Boolean
+Instances of Employee violating the invariant:
+  -> Set{mario,sophie} : Set(Employee)
+checking invariant (4) `Employee::i3': OK.
+checking invariant (5) `Project::i1c': OK.
+checking invariant (6) `Project::i4': OK.
+checking invariant (7) `Project::i5': OK.
+checked 7 invariants in 0.002s, 1 failure.
+-> '@@@5' : String
+checking structure...
+Multiplicity constraint violation in association `WorksIn':
+  Object `mario' of class `Employee' is connected to 0 objects of class `Department'
+  at association end `departments' but the multiplicity is specified as `1..*'.
+Multiplicity constraint violation in association `WorksIn':
+  Object `sophie' of class `Employee' is connected to 0 objects of class `Department'
+  at association end `departments' but the multiplicity is specified as `1..*'.
+checked structure in 1ms.
+checking invariants...
+checking invariant (1) `Department::i1a': OK.
+checking invariant (2) `Department::i2': OK.
+checking invariant (3) `Employee::i1b': FAILED.
+  -> false : Boolean
+checking invariant (4) `Employee::i3': OK.
+checking invariant (5) `Project::i1c': OK.
+checking invariant (6) `Project::i4': OK.
+checking invariant (7) `Project::i5': OK.
+checked 7 invariants in 0.002s, 1 failure.

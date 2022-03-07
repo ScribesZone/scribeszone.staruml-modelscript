@@ -1,0 +1,46 @@
+{
+    "id": "useocl",
+    "name": "ModelScript",
+    "schema": {
+        "useocl.generation": {
+            "text": "ModelScript",
+            "type": "section"
+        },
+        "useocl.generation.structure": {
+            "text": "Use ModelScript artefact structure",
+            "description": "Generates files using ModelScript artefact structure. ",
+
+            "type": "check",
+            "default": false
+        },
+        "useocl.generation.debug": {
+            "text": "Debug code generator",
+            "description": "Produce more messages on the DevTools console during code generation",
+            "type": "check",
+            "default": true
+        },
+
+        "useocl.compilation": {
+            "text": "USE OCL Compilation (post-generation)",
+            "type": "section"
+        },
+        "useocl.compilation.compile": {
+            "text": "Compilation",
+            "description": "Compile generated code. Check Yes only if USE OCL is installed.",
+            "type": "check",
+            "default": true
+        },
+        "useocl.compilation.use.path": {
+            "text": "USE OCL path",
+            "description": "Path to the 'use' command. Can be just 'use'.",
+            "type": "string",
+            "default": "use"
+        },
+        "useocl.compilation.debug": {
+            "text": "Debug compilation processor",
+            "description": "Produce more messages on the DevTools console during code compilation",
+            "type": "check",
+            "default": true
+        }
+    }
+}

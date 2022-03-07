@@ -1,0 +1,65 @@
+.line-number {
+    color: grey;
+}
+
+.token-default {
+    color: white;
+}
+
+.token-keyword {
+    color: #bfa804;
+}
+
+.token-identifier1 {
+    color: #77b5dc;
+}
+
+.token-identifier2 {
+    color: #77b5dc;
+}
+
+.token-definition1 {
+    color: #77b5dc;
+}
+
+.token-definition2 {
+    color: #77b5dc;
+}
+
+.token-reference1 {
+    color: #77b5dc;
+}
+
+.token-identifier2 {
+    color: #77b5dc;
+}
+
+.token-reference2 {
+    color: #77b5dc;
+}
+
+.token-constant {
+    color: #027d02
+}
+
+.token-comment {
+    color: rgb(255, 221, 190)
+}
+
+.token-symbol {
+    color:grey;
+}
+
+span.line-number.selected {
+    background: yellow;
+}
+
+span.line.selected {
+    background: yellow
+}
+
+
+pre.code {
+    padding: 5px;
+    margin: 1px;
+}

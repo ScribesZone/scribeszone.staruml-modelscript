@@ -1,0 +1,3 @@
+main-inv-syntax-error.use:58:23: Undefined operation `Integer.>=(String)'.
+main-inv-syntax-error.use:60:65: Warning: application of `size' to a single value should be done with `.' instead of `->'.
+main-inv-syntax-error.use:60:65: Undefined operation `Boolean.size()'.

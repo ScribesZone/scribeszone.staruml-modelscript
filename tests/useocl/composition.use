@@ -1,0 +1,12 @@
+model Composition
+
+class Car
+end
+
+class Wheel
+end
+
+composition HasWheel between
+    Car[1] role car
+    Wheel[*] role wheels
+end

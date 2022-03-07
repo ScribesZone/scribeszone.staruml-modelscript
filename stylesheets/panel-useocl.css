@@ -1,0 +1,42 @@
+/* ----------------------------------------------------------------
+          Toolbar button
+   ----------------------------------------------------------------
+ */
+#toolbar-useocl {
+    background-color: transparent;
+    background-image: url("icon-useocl.svg");
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-clip: content-box;
+}
+
+#toolbar-useocl.selected {
+    background-position: -24px 0;
+}
+
+/* ----------------------------------------------------------------
+           Panel
+   ----------------------------------------------------------------
+ */
+#panel-useocl-zone {
+    overflow: auto;
+    padding: 2px;
+    height: 100%;
+    width: 100%;
+    background-color: #222222;
+    text-shadow: none;
+    outline-color: transparent;
+    outline-style: none;
+    font-size: 12px;
+}
+
+#panel-useocl-zone .section {
+
+}
+
+#panel-useocl-zone .checker.error {
+    color: #f0e5e5;
+    background: #660201;
+    padding: 1px;
+    margin-left: 30px;
+}

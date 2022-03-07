@@ -1,0 +1,9 @@
+-> '@@@1' : String
+-> '@@@2' : String
+-> '@@@3' : String
+-> '@@@4' : String
+-> '@@@5' : String
+checking structure...
+checked structure in 1ms.
+checking invariants...
+checked 0 invariants in 0.000s, 0 failures.

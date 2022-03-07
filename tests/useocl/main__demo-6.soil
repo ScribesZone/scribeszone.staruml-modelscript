@@ -1,0 +1,74 @@
+                                                                    ?'@@@1'
+-- @scenario Demo5
+                                                                    ?'@@@2'
+-- @actori toufik:CEO
+                                                                    ?'@@@3'
+-- @actori maria:Secretary
+                                                                    ?'@@@4'
+-- @actori xavier:Manager
+                                                                    ?'@@@5'
+-- @context
+                                                                    ?'@@@6'
+!computing := new Department
+                                                                    ?'@@@7'
+!computing.name := 'Computing departement'
+                                                                    ?'@@@8'
+!computing.location := 'Los alaambritos'
+                                                                    ?'@@@9'
+!computing.budget := 10000
+                                                                    ?'@@@10'
+-- @endcontext
+                                                                    ?'@@@11'
+!djamel := new Employee
+                                                                    ?'@@@12'
+!djamel.name := 'Djamel'
+                                                                    ?'@@@13'
+!djamel.salary := 2600
+                                                                    ?'@@@14'
+!insert (djamel, computing) into WorksIn
+                                                                    ?'@@@15'
+check -v -d -a
+                                                                    ?'@@@16'
+-- @uci maria RegisterNewEmployee
+                                                                    ?'@@@17'
+!ioannis := new Employee
+                                                                    ?'@@@18'
+!ioannis.name := 'Ioannis'
+                                                                    ?'@@@19'
+!ioannis.salary := 1900
+                                                                    ?'@@@20'
+!insert (ioannis, computing) into WorksIn
+                                                                    ?'@@@21'
+-- @enduci
+                                                                    ?'@@@22'
+??2+3*5=3
+                                                                    ?'@@@23'
+!turbo := new Project
+                                                                    ?'@@@24'
+!turbo.name := 'Maxi turbo project'
+                                                                    ?'@@@25'
+!turbo.budget := 5000
+                                                                    ?'@@@26'
+! c1 := new Control() between (computing, turbo)
+                                                                    ?'@@@27'
+! c1.frequence:=15
+                                                                    ?'@@@28'
+-- @uci maria IncreaseSalary
+                                                                    ?'@@@29'
+-- @context
+                                                                    ?'@@@30'
+!sandrine := new Employee
+                                                                    ?'@@@31'
+!sandrine.name := 'Sandrine'
+                                                                    ?'@@@32'
+!sandrine.salary := 2000
+                                                                    ?'@@@33'
+!insert (sandrine, computing) into WorksIn
+                                                                    ?'@@@34'
+-- @endcontext
+                                                                    ?'@@@35'
+!sandrine.salary := 2600
+                                                                    ?'@@@36'
+-- @uci maria RegisterNewEmployee
+                                                                    ?'@@@37'
+

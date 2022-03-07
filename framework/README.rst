@@ -1,0 +1,1 @@
+Experimental framework for building StarUML plugins.

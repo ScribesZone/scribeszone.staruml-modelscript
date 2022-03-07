@@ -1,0 +1,17 @@
+                                                                    ?'@@@1'
+! c1 := new Car
+                                                                    ?'@@@2'
+! c2 := new Car
+                                                                    ?'@@@3'
+! c3 := new Car
+                                                                    ?'@@@4'
+! w := new Wheel
+                                                                    ?'@@@5'
+! insert(c1,w) into HasWheel
+                                                                    ?'@@@6'
+! insert(c2,w) into HasWheel
+                                                                    ?'@@@7'
+! insert(c3,w) into HasWheel
+                                                                    ?'@@@8'
+check -v -d
+                                                                    ?'@@@9'

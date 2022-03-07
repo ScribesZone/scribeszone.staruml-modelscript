@@ -1,0 +1,19 @@
+-> '@@@1' : String
+-> '@@@2' : String
+-> '@@@3' : String
+-> '@@@4' : String
+checking structure...
+Multiplicity constraint violation in association `HasWheel':
+  Object `Wheel1' of class `Wheel' is connected to 0 objects of class `Car'
+  at association end `car' but the multiplicity is specified as `1'.
+checked structure in 2ms.
+checking invariants...
+checked 0 invariants in 0.001s, 0 failures.
+-> '@@@5' : String
+checking structure...
+Multiplicity constraint violation in association `HasWheel':
+  Object `Wheel1' of class `Wheel' is connected to 0 objects of class `Car'
+  at association end `car' but the multiplicity is specified as `1'.
+checked structure in 0ms.
+checking invariants...
+checked 0 invariants in 0.001s, 0 failures.

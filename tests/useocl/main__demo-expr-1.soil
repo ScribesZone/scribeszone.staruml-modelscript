@@ -1,0 +1,56 @@
+                                                                    ?'@@@1'
+        !create computing : Department
+                                                                    ?'@@@2'
+        !computing.name := 'Computing departement'
+                                                                    ?'@@@3'
+        !computing.location := 'Los alaambritos'
+                                                                    ?'@@@4'
+        !computing.budget := 10000
+                                                                    ?'@@@5'
+        !create djamel : Employee
+                                                                    ?'@@@6'
+        !djamel.name := 'Djamel'
+                                                                    ?'@@@7'
+        !djamel.salary := 2600
+                                                                    ?'@@@8'
+        !insert (djamel, computing) into WorksIn
+                                                                    ?'@@@9'
+        !create ioannis : Employee
+                                                                    ?'@@@10'
+        !ioannis.name := 'Ioannis'
+                                                                    ?'@@@11'
+        !ioannis.salary := 1900
+                                                                    ?'@@@12'
+        !insert (ioannis, computing) into WorksIn
+                                                                    ?'@@@13'
+        !create turbo : Project
+                                                                    ?'@@@14'
+        !turbo.name := 'Maxi turbo project'
+                                                                    ?'@@@15'
+        !turbo.budget := 5000
+                                                                    ?'@@@16'
+        ! c1 := new Control() between (computing, turbo)
+                                                                    ?'@@@17'
+        ! c1.frequence:=15
+                                                                    ?'@@@18'
+        !create sandrine : Employee
+                                                                    ?'@@@19'
+        !sandrine.name := 'Sandrine'
+                                                                    ?'@@@20'
+        !sandrine.salary := 2000
+                                                                    ?'@@@21'
+        !insert (sandrine, computing) into WorksIn
+                                                                    ?'@@@22'
+        !sandrine.salary := 2600
+                                                                    ?'@@@23'
+        ?? Department.allInstances
+                                                                    ?'@@@24'
+        ?? sandrine.departments.name
+                                                                    ?'@@@25'
+\
+?? sandrine.departments.budget->sum
+   + ioannis.salary
+.
+                                                                    ?'@@@26'
+check -v -d
+                                                                    ?'@@@27'

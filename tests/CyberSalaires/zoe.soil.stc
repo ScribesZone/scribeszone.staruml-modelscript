@@ -1,0 +1,38 @@
+-> '@1' : String
+-> '@2' : String
+-> '@3' : String
+-> '@4' : String
+<input>:line 1:0 no viable alternative at input 'create'
+-> '@5' : String
+<input>:1:0: Variable `objectWithStringClassifier' in expression `objectWithStringClassifier' is undefined.
+-> '@6' : String
+<input>:line 1:0 no viable alternative at input 'objectWithStringClassifier'
+-> '@7' : String
+<input>:1:0: Variable `objectWithStringClassifier' in expression `objectWithStringClassifier' is undefined.
+-> '@8' : String
+<input>:line 1:0 no viable alternative at input 'objectWithStringClassifier'
+-> '@9' : String
+-> '@10' : String
+<input>:1:0: Class `Personne' does not have an attribute `e'.
+-> '@11' : String
+<input>:line 1:8 no viable alternative at character '°'
+-> '@12' : String
+<input>:line 1:0 no viable alternative at input 'y'
+-> '@13' : String
+<input>:1:0: Class `Personne' does not have an attribute `e'.
+-> '@14' : String
+-> '@15' : String
+<input>:line 1:0 no viable alternative at input 'create'
+-> '@16' : String
+<input>:line 1:0 no viable alternative at input 'insert'
+-> '@17' : String
+<input>:1:0: Variable `abe' in expression `abe' is undefined.
+-> '@18' : String
+checking structure...
+checked structure in 1ms.
+checking invariants...
+checked 0 invariants in 0.001s, 0 failures.
+checking structure...
+checked structure in 0ms.
+checking invariants...
+checked 0 invariants in 0.005s, 0 failures.
