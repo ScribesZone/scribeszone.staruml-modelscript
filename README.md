@@ -12,9 +12,9 @@ Installation
 This plugin has to be installed in the StarUML user [configuration
 directory](https://docs.staruml.io/developing-extensions/getting-started#create-an-extension) :
 
-* LINUX : ~/.config/StarUML
-* WINDOWS : C:\Users\<user>\AppData\Roaming\StarUML
-* MAC : /Users/<user>/Library/Application Support/StarUML
+* LINUX : ~/.config/StarUML/extensions/user
+* WINDOWS : C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
+* MAC : /Users/<user>/Library/Application Support/StarUML\extensions\user
 
 Select the directory suited to your OS and in a shell windows enter :
 
