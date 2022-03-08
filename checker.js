@@ -233,8 +233,8 @@ class AttributeChecker extends Checker {
                 this.error(
                     [
                         'The type of attribute ',
-                        + this.elementLabel(attribute),
-                        + ' must be in CamlCase'])
+                        this.elementLabel(attribute),
+                        ' must be in CamlCase'])
             }
         } else if (type_ instanceof type.UMLEnumeration ) {
             return
