@@ -215,7 +215,12 @@ class USEOCLGenerator extends AbstractGenerator {
         } else if (type_ instanceof type.UMLClass) {
             this.writeIdentifier(type_.name, type_)
             // TODO: generate here an error
+        } else if (typeof type_ === "string") {
+            this.write(type_)
+        } else if (type_ === null || type_ === undefined ) {
+            this.write('**UNDEFINED**')
         } else {
+            console.error("unexpected attribute type:", type_)
             this.write(type_)
         }
         this.ruleEnd()
