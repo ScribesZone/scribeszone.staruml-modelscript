@@ -221,7 +221,7 @@ class AttributeChecker extends Checker {
 
     checkType(attribute) {
         const type_ = attribute.type
-        if (type_=== '' || type_ === undefined) {
+        if (type_=== '' || type_ === undefined || type === null) {
             this.error(
                 [
                     'Missing type for attribute ',
