@@ -76,6 +76,8 @@ class USEOCLGenerator extends AbstractGenerator {
                 use_filename)
         }
         this.classModelAST = this.openAST(use_filename, 'class')
+        this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!")
+        this.writeln()
         this.write('model ', 'keyword')
         this.write('M')
         this.writeln()
@@ -323,6 +325,8 @@ class USEOCLGenerator extends AbstractGenerator {
             'state',
             [stateModel])
         this.stateModelASTs.push(ast)
+        this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!")
+        this.writeln()
         this.write('-- state ', 'keyword')
         this.writeIdentifier(stateModel.name, stateModel)
         this.writeln()
@@ -534,6 +538,8 @@ class USEOCLGenerator extends AbstractGenerator {
                 USS_FILENAME)
         }
         this.classModelAST = this.openAST(use_case_model_filename, 'usecase')
+        this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!")
+        this.writeln()
         this.write('model ', 'keyword')
         this.write('M')
         this.writeln()
