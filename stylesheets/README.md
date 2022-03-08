@@ -1,1 +1,0 @@
-Definition of custom css. See panels/ for usage.
