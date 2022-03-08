@@ -15,6 +15,12 @@ const MODELSCRIPT_USS_DIRECTORY = 'cu/cu'
 const USS_FILENAME = 'cu'
 const path = require('path')
 
+const ATTRIBUTE_TYPE_CONVERSIONS = {
+    "DateTime" : "String",
+    "Date" : "String",
+    "Time" : "String"
+}
+
 const { AbstractGenerator } = require("./framework/generators")
 const {
     selectOwnedElements,
@@ -216,11 +222,14 @@ class USEOCLGenerator extends AbstractGenerator {
             this.writeIdentifier(type_.name, type_)
             // TODO: generate here an error
         } else if (typeof type_ === "string") {
+            if (type_ in ATTRIBUTE_TYPE_CONVERSIONS) {
+                type_ = ATTRIBUTE_TYPE_CONVERSIONS[type_]
+            }
             this.write(type_)
         } else if (type_ === null || type_ === undefined ) {
             this.write('**UNDEFINED**')
         } else {
-            console.error("unexpected attribute type:", type_)
+            console.error("[Generator]: unexpected attribute type:", type_)
             this.write(type_)
         }
         this.ruleEnd()
