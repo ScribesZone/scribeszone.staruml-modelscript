@@ -640,7 +640,7 @@
 											"top": 374,
 											"width": 154.55908203125,
 											"height": 13,
-											"text": "rang: Integer",
+											"text": "rang: Time",
 											"horizontalAlignment": 0
 										}
 									],
@@ -2853,7 +2853,7 @@
 								"$ref": "AAAAAAF2mu/OmGYlV9s="
 							},
 							"name": "rang",
-							"type": "Integer"
+							"type": "Time"
 						}
 					]
 				},
