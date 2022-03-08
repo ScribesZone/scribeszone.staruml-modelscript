@@ -352,7 +352,7 @@ class USEOCLGenerator extends AbstractGenerator {
 
     stateObjects(stateModel) {
         console.assert(
-            stateModel instanceof type.UMLModel, stateModel)
+            stateModel instanceof type.UMLPackage, stateModel)
         return (
             selectOwnedElements(stateModel, type.UMLObject)
                 .filter(object_ => isRegularObject(object_)))
@@ -435,16 +435,16 @@ class USEOCLGenerator extends AbstractGenerator {
 
     /**
      * Returns the links that are either nested in the objects of the
-     * state model or that are at the top level of this state model.
+     * state package or that are at the top level of this state package.
      * By default, when a link is created it is stored in the source object
      * of the link. It is still possible to move this link to the top
-     * of the state model, ot to another object ! This function returns
+     * of the state package, ot to another object ! This function returns
      * links at the top level or inside an object at the top level.
      * @param stateModel the model to explore
      * @returns {Element[]} links
      */
     stateLinks(stateModel) {
-        console.assert(stateModel instanceof type.UMLModel)
+        console.assert(stateModel instanceof type.UMLPackage)
         const outsideLinks = selectOwnedElements(stateModel, type.UMLLink)
         const insideLinks = (
             this.stateObjects(stateModel).map(object_ =>
