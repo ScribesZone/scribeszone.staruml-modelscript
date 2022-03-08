@@ -296,7 +296,7 @@ class USEOCLGenerator extends AbstractGenerator {
     }
 
     getStateModels() {
-        return selectAllElements(type.UMLModel, 'state')
+        return selectAllElements(type.UMLPackage, 'state')
     }
 
     generateStateModel(stateModel) {
