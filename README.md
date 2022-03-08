@@ -12,13 +12,13 @@ Installation
 This plugin has to be installed in the StarUML user [configuration
 directory](https://docs.staruml.io/developing-extensions/getting-started#create-an-extension) :
 
-* LINUX : ~/.config/StarUML/extensions/user
-* WINDOWS : C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
-* MAC : /Users/<user>/Library/Application Support/StarUML/extensions/user
+* MacOS: ~/Library/Application Support/StarUML/extensions/user
+* Windows: C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
+* ~/.config/StarUML/extensions/user 
 
 Select the directory suited to your OS and in a shell windows enter :
 
-    cd the_config_dir_as_above
+    cd the_config_dir_as_mentioned_above
     git clone https://github.com/ScribesZone/scribeszone.staruml-modelscript
 
 NOTE: Though this is not compulsory it is best to install the companion
@@ -26,6 +26,16 @@ NOTE: Though this is not compulsory it is best to install the companion
 generated files.
 
     git clone https://github.com/ScribesZone/scribeszone.staruml-files
+
+To test the installation start StarUML (or reload it with ctrl-R if is
+already opened) then check that the presence of the following menu :
+
+  Tools > ModelScript
+
+If you see this menu then the plugin is loaded. You can try the USE OCL
+generator with `Tools > ModelScript > Generate` or `Ctrl-W`. This should
+open a window indicating if the model contains errors and generate code.
+See below.
 
 Features
 --------
