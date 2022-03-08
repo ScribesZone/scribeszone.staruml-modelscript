@@ -14,7 +14,7 @@ directory](https://docs.staruml.io/developing-extensions/getting-started#create-
 
 * LINUX : ~/.config/StarUML/extensions/user
 * WINDOWS : C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
-* MAC : /Users/<user>/Library/Application Support/StarUML\extensions\user
+* MAC : /Users/<user>/Library/Application Support/StarUML/extensions/user
 
 Select the directory suited to your OS and in a shell windows enter :
 
