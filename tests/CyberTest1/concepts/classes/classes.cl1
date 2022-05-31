@@ -1,0 +1,101 @@
+-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!
+
+model M
+
+enum PublicCible {
+    unCinqAns,
+    jeunePublic,
+    toutPublic,
+    adulte
+}
+
+enum TypeDeSpectacle {
+    opera,
+    drame,
+    humoristique,
+    musical,
+    cirque
+}
+
+enum StatutCommande {
+    estEnAttente,
+    estPreReservee,
+    estPayee
+}
+
+class Client
+    attributes
+        login : String
+        nom : String
+        prenom : String
+        adresseElectronique : String
+        motDePasse : String
+end
+
+class Representation
+    attributes
+        numeroRepresentation : Integer
+        dateRepresentation : String
+        reservationSansPayer : Boolean
+        nombreDePlacesTotal : Integer
+        nombreDePlacesDisponibles : Integer
+end
+
+class Spectacle
+    attributes
+        nom : String
+        prixDeBase : Integer
+        publicCible : PublicCible
+        typeDeSpectacle : TypeDeSpectacle
+end
+
+class Place
+    attributes
+        place : Integer
+end
+
+class Commande
+    attributes
+        numeroCommande : Integer
+        statutCommande : StatutCommande
+        nombreDePlaces : Integer
+end
+
+class Siege
+    attributes
+        siege : Integer
+        numero : Integer
+        rang : Integer
+        zone : Integer
+end
+
+association EffectueUne
+    between
+        Client[1] role client
+        Commande[0..*] role commandes
+end
+
+association DisposeDe
+    between
+        Representation[1] role representation
+        Place[0..*] role places
+end
+
+association FaitLObjetDe
+    between
+        Spectacle[1] role spectacle
+        Representation[0..*] role representations
+end
+
+association EstSelectionneePar
+    between
+        Place[1..*] role places
+        Commande[0..1] role commande
+end
+
+association EstAssocieeA
+    between
+        Place[0..*] role places
+        Siege[1] role siege
+end
+

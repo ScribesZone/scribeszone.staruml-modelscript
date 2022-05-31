@@ -164,8 +164,8 @@ exports.CustomPanel = CustomPanel;
 // FIXME: toogle indicator in menu not working
 var ElementListPanel = /** @class */ (function () {
     function ElementListPanel(title, toggleMenu) {
-        var _this = this;
         if (toggleMenu === void 0) { toggleMenu = undefined; }
+        var _this = this;
         var templateFile = path.join(__dirname, '..', 'panels', 'panel-element-list.html');
         this.toggleMenu = toggleMenu;
         this.elementListPanelTemplate = (fs.readFileSync(templateFile, 'utf8'));

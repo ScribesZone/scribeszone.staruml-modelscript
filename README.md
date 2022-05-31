@@ -10,13 +10,13 @@ Installation
 ------------
 
 This plugin has to be installed in the StarUML user [configuration
-directory](https://docs.staruml.io/developing-extensions/getting-started#create-an-extension) :
+directory](https://docs.staruml.io/developing-extensions/getting-started#create-an-extension):
 
 * MacOS: ~/Library/Application Support/StarUML/extensions/user
 * Windows: C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
 * ~/.config/StarUML/extensions/user 
 
-Select the directory suited to your OS and in a shell windows enter :
+Select the directory suited to your OS and in a shell windows enter:
 
     cd the_config_dir_as_mentioned_above
     git clone https://github.com/ScribesZone/scribeszone.staruml-modelscript
@@ -27,24 +27,24 @@ generated files.
 
     git clone https://github.com/ScribesZone/scribeszone.staruml-files
 
-To test the installation start StarUML (or reload it with ctrl-R if is
-already opened) then check that the presence of the following menu :
+To test the installation launch StarUML (or reload it with `ctrl-R` if is
+already opened) then check the presence of the following menu:
 
   Tools > ModelScript
 
 If you see this menu then the plugin is loaded. You can try the USE OCL
 generator with `Tools > ModelScript > Generate` or `Ctrl-W`. This should
-open a window indicating if the model contains errors and generate code.
+open a window indicating if the current model contains errors and generate code.
 See below.
 
 Features
 --------
 
-This plugin provided the following features :
+This plugin provided the following features:
 
 * diagram beautifier,
 * model checks,
-* modelscript generation
+* modelscript generation (currently USE OCL code)
 
 
 Diagram beautifer (Alt-W)
@@ -64,8 +64,7 @@ or via `Alt-W`. All diagrams are beautified at once.
 Checking models (Ctrl-W)
 ------------------------
 
-Various consistency checks are run on all the following elements.
-This includes 
+Various consistency checks are run on the following elements:
 * classes,
 * attributes,
 * enumerations,
@@ -82,7 +81,7 @@ The checker is always launched before generation (see section below).
 ModelScript Generation (Ctrl->W)
 --------------------------------
 
-After checking the model (see above) the following files are generated :
+After checking the model (see above) the following files are generated:
 
 * the **class model**. The class model is written in the file `classes.cl1`.
   This file is expressed in [ClassScript1](https://modelscript.readthedocs.io/en/latest/languages/classes1/index.html) which is a superset of
@@ -102,13 +101,13 @@ The generator (and checker) can be launched thanks to the
 shortcut.
 
 The structure of the generated directory and files depends on the
-preference of the plugin :
+preference of the plugin:
 
-* *Flat structure* : all files are generated in the same directory of
+* *Flat structure*: all files are generated in the same directory of
   the StarUML `.mdj` file. For instance the `classes.cl1` will be
   at the same level. This is the default behavior.
 
-* *ModelScript structure* : the generator also support the 
+* *ModelScript structure*: the generator also support the 
   [ModelScript artefact structure](https://modelscript.readthedocs.io/en/latest/artefacts/index.html). In this case the class model
   will be saved in the `concepts/classes/classes.cl1` file. In order
   to select this behavior check the following option 
