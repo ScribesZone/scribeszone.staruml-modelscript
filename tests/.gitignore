@@ -3,6 +3,7 @@ private/
 *.use.utc
 *.soil
 *.soil.stc
+*.uss.utc
 *.cl1
 *.ob1
 *.uss
