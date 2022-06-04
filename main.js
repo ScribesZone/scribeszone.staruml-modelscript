@@ -4,7 +4,7 @@ require('./framework/misc');
 var INCLUDE_ELP_DEMO = false;
 var INCLUDE_DBMODELGEN_DEMO = false;
 var ENABLE_CODE_INTERFACE = false;
-var ENABLE_PROCESSOR = false;
+var ENABLE_PROCESSOR = true;
 var ENABLE_CONSOLE_OUTPUT_DISPLAY = false;
 var CustomPanel = require("./framework/panels").CustomPanel;
 var Beautifier = require("./beautifier").Beautifier;

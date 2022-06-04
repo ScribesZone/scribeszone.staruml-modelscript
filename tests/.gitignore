@@ -1,1 +1,8 @@
 private/
+*.use
+*.use.utc
+*.soil
+*.soil.stc
+
+concepts/
+cu/

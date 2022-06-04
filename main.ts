@@ -5,7 +5,7 @@ require('./framework/misc')
 const INCLUDE_ELP_DEMO = false
 const INCLUDE_DBMODELGEN_DEMO = false
 const ENABLE_CODE_INTERFACE = false
-const ENABLE_PROCESSOR = false
+const ENABLE_PROCESSOR = true
 const ENABLE_CONSOLE_OUTPUT_DISPLAY = false
 
 const { CustomPanel } = require("./framework/panels")
