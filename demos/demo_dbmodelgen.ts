@@ -1,15 +1,25 @@
-declare var app : any
+/**
+ * Create a ERD model and diagram (LesPersonnes, LesVoitures, EstProprietaireDe)
+ */
 
+// Command in the "View" menu
+// IMPORTANT: this constant comes from menus/menu-view.json
+const TOGGLE_DBMODELGEN_COMMAND = 'demos:dbmodelgen'
 
-class DemoDBModelGenerator {
+declare var app
+
+export class DemoDBModelGenerator {
     private targetContainer: undefined
     private targetModel: undefined
     private targetDiagram: undefined
     private _viewMap: {}
     private _elementMap: {}
+    private dbmodelgenGenCommand: string
 
 
     constructor() {
+        console.log('DG: Installing DemoDBModelGenerator')
+        this.dbmodelgenGenCommand = TOGGLE_DBMODELGEN_COMMAND
         // console.log('DG: MyModelGenerator', app.repository.select('@UMLClass'))
         // console.log("new MyModelGenerator()  d")
         // const x =app.repository.select('@Project')[0]
@@ -23,7 +33,14 @@ class DemoDBModelGenerator {
         this.targetDiagram = undefined
         this._viewMap = {}
         this._elementMap = {}
-        console.log(this)
+        console.log('app =', app)
+        console.log('DG:36 app.commands', app.commands)
+        app.commands.register(
+            this.dbmodelgenGenCommand,
+            () => {
+                this.doGenerate()
+            }
+        )
     }
 
     // initGenerator() {
@@ -118,7 +135,7 @@ class DemoDBModelGenerator {
 
 
     doGenerate() {
-        console.log('dpGenerate',app.repository.select('@UMLClass'))
+        console.log('dpGenerate: ',app.repository.select('@UMLClass'))
         this.setTargetContainer()
         this.createTargetModel(
             '**** DataModel ****',
@@ -318,7 +335,7 @@ var assoView = app.factory.createModelAndView(options3)
 // IMPORTANT: this constant comes from menus/menu-tools.json
 const DBMODELGEN_COMMAND = 'demos:dbmodelgen'
 
-class DemoDBModelGeneratorInterface {
+export class DemoDBModelGeneratorInterface {
     generator: any
     genModelCommand: any
 
@@ -337,4 +354,3 @@ class DemoDBModelGeneratorInterface {
     }
 }
 
-exports.DemoDBModelGenerator = DemoDBModelGenerator

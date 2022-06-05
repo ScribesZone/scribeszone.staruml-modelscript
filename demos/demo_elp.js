@@ -1,10 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ElementListInterface = void 0;
 var panels_1 = require("../framework/panels");
-//------------- DEMOELP ----------------------------------------------
-// Demo. ELP = element list panel.
-// This demo shows a list of elements
-//
 var VIEW_TOGGLE_DEMOELP = 'view.toggle.demoelp';
 // Command in the "View" menu
 // IMPORTANT: this constant comes from menus/menu-view.json
@@ -15,6 +12,7 @@ var DEMO_ELP_COMMAND = 'demos:demoelp';
 var ElementListInterface = /** @class */ (function () {
     function ElementListInterface() {
         var _this = this;
+        console.log('DG: Installing ElementListInterface');
         this.updateCommand = DEMO_ELP_COMMAND;
         this.toggleMenu = VIEW_TOGGLE_DEMOELP;
         this.toggleCommand = TOGGLE_DEMOELP_COMMAND;
@@ -38,4 +36,5 @@ var ElementListInterface = /** @class */ (function () {
     };
     return ElementListInterface;
 }());
+exports.ElementListInterface = ElementListInterface;
 //# sourceMappingURL=demo_elp.js.map

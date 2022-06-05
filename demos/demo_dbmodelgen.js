@@ -1,5 +1,17 @@
+"use strict";
+/**
+ * Create a ERD model and diagram (LesPersonnes, LesVoitures, EstProprietaireDe)
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DemoDBModelGeneratorInterface = exports.DemoDBModelGenerator = void 0;
+// Command in the "View" menu
+// IMPORTANT: this constant comes from menus/menu-view.json
+var TOGGLE_DBMODELGEN_COMMAND = 'demos:dbmodelgen';
 var DemoDBModelGenerator = /** @class */ (function () {
     function DemoDBModelGenerator() {
+        var _this = this;
+        console.log('DG: Installing DemoDBModelGenerator');
+        this.dbmodelgenGenCommand = TOGGLE_DBMODELGEN_COMMAND;
         // console.log('DG: MyModelGenerator', app.repository.select('@UMLClass'))
         // console.log("new MyModelGenerator()  d")
         // const x =app.repository.select('@Project')[0]
@@ -13,7 +25,11 @@ var DemoDBModelGenerator = /** @class */ (function () {
         this.targetDiagram = undefined;
         this._viewMap = {};
         this._elementMap = {};
-        console.log(this);
+        console.log('app =', app);
+        console.log('DG:36 app.commands', app.commands);
+        app.commands.register(this.dbmodelgenGenCommand, function () {
+            _this.doGenerate();
+        });
     }
     // initGenerator() {
     //     this.project = app.repository.select('@Project')[0]
@@ -97,7 +113,7 @@ var DemoDBModelGenerator = /** @class */ (function () {
         app.engine.setProperties(object, map);
     };
     DemoDBModelGenerator.prototype.doGenerate = function () {
-        console.log('dpGenerate', app.repository.select('@UMLClass'));
+        console.log('dpGenerate: ', app.repository.select('@UMLClass'));
         this.setTargetContainer();
         this.createTargetModel('**** DataModel ****', 'ERDDataModel');
         this.createTargetDiagram('**** DataModel Diagram ****', 'ERDDiagram');
@@ -173,6 +189,7 @@ var DemoDBModelGenerator = /** @class */ (function () {
     };
     return DemoDBModelGenerator;
 }());
+exports.DemoDBModelGenerator = DemoDBModelGenerator;
 /*
 
 var options1 = {
@@ -265,5 +282,5 @@ var DemoDBModelGeneratorInterface = /** @class */ (function () {
     }
     return DemoDBModelGeneratorInterface;
 }());
-exports.DemoDBModelGenerator = DemoDBModelGenerator;
+exports.DemoDBModelGeneratorInterface = DemoDBModelGeneratorInterface;
 //# sourceMappingURL=demo_dbmodelgen.js.map

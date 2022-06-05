@@ -1,17 +1,34 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require('./framework/misc');
-var INCLUDE_ELP_DEMO = false;
-var INCLUDE_DBMODELGEN_DEMO = false;
-var ENABLE_CODE_INTERFACE = false;
+/**
+ * Include the "Element List Panel" in the interface.
+ */
+var INCLUDE_ELP_DEMO = true;
+/**
+ * Include a demo that generate ERD model creation. It shows how to create
+ * ERD entities.
+ */
+var INCLUDE_DBMODELGEN_DEMO = true; /* ERD model creation demo */
+/**
+ * Disaply console output during code generation. This is not good looking
+ * since the result is displayed in the console with filenames and so on.
+ */
+var ENABLE_CONSOLE_OUTPUT_DISPLAY = false; /* display in the code in console windows */
+/**
+ * Show syntax coloring output. This is currently not good since it goes
+ * in the same place where other output is displayed. What is more
+ * all sources generated are in the same place as well. We should have
+ * a drop down menu to select the file to be displayed for instance.
+ */
+var ENABLE_CODE_INTERFACE = true;
 var ENABLE_PROCESSOR = true;
-var ENABLE_CONSOLE_OUTPUT_DISPLAY = false;
-var CustomPanel = require("./framework/panels").CustomPanel;
-var Beautifier = require("./beautifier").Beautifier;
-var CheckerRegistry = require("./checker").CheckerRegistry;
-var USEOCLGenerator = require("./generator").USEOCLGenerator;
-var USEOCLProcessor = require("./processor").USEOCLProcessor;
+var panels_1 = require("./framework/panels");
 var renderer_1 = require("./framework/renderer");
+var beautifier_1 = require("./beautifier");
+var checker_1 = require("./checker");
+var generator_1 = require("./generator");
+var processor_1 = require("./processor");
 var EXTENSION = {
     "id": 'useocl',
     "title": 'USE OCL'
@@ -82,15 +99,15 @@ var ConsoleInterface = /** @class */ (function () {
         this.generateCommand = generateCommand;
         this.beautifyCommand = beautifyCommand;
         this.toggleCommand = toggleCommand;
-        this.consolePanel = new CustomPanel(EXTENSION.id, EXTENSION.title + ' console', true);
+        this.consolePanel = new panels_1.CustomPanel(EXTENSION.id, EXTENSION.title + ' console', true);
         this.hardwiredConsoleOutput = new HardwiredConsoleOutput();
         app.commands.register(this.beautifyCommand, function () {
-            var beautifier = new Beautifier();
+            var beautifier = new beautifier_1.Beautifier();
             beautifier.doBeautify();
         });
         app.commands.register(this.generateCommand, function () {
             var debug_generator = app.preferences.get('useocl.generation.debug');
-            var checker = new CheckerRegistry(debug_generator, {
+            var checker = new checker_1.CheckerRegistry(debug_generator, {
                 // TODO: encapsulate references to panel
                 // #panel-useocl-zone should be a parameter
                 onError: function (checker_error) {
@@ -106,7 +123,7 @@ var ConsoleInterface = /** @class */ (function () {
                 }
             });
             var use_modelscript_artefact_structure = (app.preferences.get('useocl.generation.structure'));
-            var generator = new USEOCLGenerator(use_modelscript_artefact_structure, debug_generator, {
+            var generator = new generator_1.USEOCLGenerator(use_modelscript_artefact_structure, debug_generator, {
                 // TODO: encapsulate references to panel
                 // #panel-useocl-zone should be a parameter
                 afterToken: function (token) {
@@ -168,7 +185,7 @@ var ConsoleInterface = /** @class */ (function () {
                 }
                 if (ENABLE_PROCESSOR) {
                     var debug_processor = app.preferences.get('useocl.compilation.debug');
-                    var processor = new USEOCLProcessor(generator, debug_processor);
+                    var processor = new processor_1.USEOCLProcessor(generator, debug_processor);
                     if (processor.isProcessorEnabled()) {
                         // if (this.compilationPanel) {
                         //     this.compilationPanel.show()
@@ -227,8 +244,8 @@ function init() {
     * This demo shows how to create a database data model
     */
     if (INCLUDE_DBMODELGEN_DEMO) {
-        var DemoDBModelGenerator_1 = require("./demos/demo_dbmodelgen").DemoDBModelGenerator;
-        new DemoDBModelGenerator_1();
+        var DemoDBModelGenerator = require("./demos/demo_dbmodelgen").DemoDBModelGenerator;
+        new DemoDBModelGenerator();
     }
 }
 exports.init = init;

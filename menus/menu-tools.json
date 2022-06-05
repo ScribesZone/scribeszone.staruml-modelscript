@@ -18,6 +18,16 @@
               "command": "useocl:beautify"
             }
           ]
+        },
+        {
+          "label": "DEMO: ELP - Create ElementListPanel",
+          "id": "tools.demos.demoelp",
+          "command": "demos:demoelp"
+        },
+        {
+          "label": "DEMO: DBMODELGEN - Generate db model",
+          "id": "tools.demos.dbmodelgen",
+          "command": "demos:dbmodelgen"
         }
       ]
     }

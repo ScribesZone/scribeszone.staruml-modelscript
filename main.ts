@@ -1,19 +1,43 @@
-declare var app : any
+declare var app
 
 require('./framework/misc')
 
-const INCLUDE_ELP_DEMO = false
-const INCLUDE_DBMODELGEN_DEMO = false
-const ENABLE_CODE_INTERFACE = false
-const ENABLE_PROCESSOR = true
-const ENABLE_CONSOLE_OUTPUT_DISPLAY = false
+/**
+ * Include the "Element List Panel" in the interface.
+ */
+const INCLUDE_ELP_DEMO = true
 
-const { CustomPanel } = require("./framework/panels")
-const { Beautifier } = require("./beautifier")
-const { CheckerRegistry } = require("./checker")
-const { USEOCLGenerator } = require("./generator")
-const { USEOCLProcessor } = require("./processor")
-import { CodeInterface } from "./framework/renderer"
+/**
+ * Include a demo that generate ERD model creation. It shows how to create
+ * ERD entities.
+ */
+const INCLUDE_DBMODELGEN_DEMO = true /* ERD model creation demo */
+
+/**
+ * Disaply console output during code generation. This is not good looking
+ * since the result is displayed in the console with filenames and so on.
+ */
+const ENABLE_CONSOLE_OUTPUT_DISPLAY = false /* display in the code in console windows */
+
+/**
+ * Show syntax coloring output. This is currently not good since it goes
+ * in the same place where other output is displayed. What is more
+ * all sources generated are in the same place as well. We should have
+ * a drop down menu to select the file to be displayed for instance.
+ */
+const ENABLE_CODE_INTERFACE = true
+
+const ENABLE_PROCESSOR = true
+
+
+import { CustomPanel }      from "./framework/panels"
+import { CodeInterface }    from "./framework/renderer"
+
+import { Beautifier }       from "./beautifier"
+import { CheckerRegistry }  from "./checker"
+import { USEOCLGenerator }  from "./generator"
+import { USEOCLProcessor }  from "./processor"
+
 
 const EXTENSION = {
     "id": 'useocl',
@@ -22,7 +46,6 @@ const EXTENSION = {
 
 //------------- COMMANDS -------------------------------------------
 // const TOGGLE_COMPILATION_COMMAND = EXTENSION.id+':toggle.compilation'
-
 const TOGGLE_CONSOLE_COMMAND = EXTENSION.id+':toggle.console'
 const GENERATE_COMMAND = EXTENSION.id+':generate'
 const BEAUTIFY_COMMAND = EXTENSION.id+':beautify'
@@ -95,12 +118,12 @@ class HardwiredConsoleOutput {
 
 
 class ConsoleInterface {
-    private generateCommand: string ;
-    private beautifyCommand: string ;
-    toggleCommand: any
+    private readonly generateCommand: string
+    private readonly beautifyCommand: string
+    private readonly toggleCommand: string
 //    compilationPanel: any
-    consolePanel: any
-    private hardwiredConsoleOutput: HardwiredConsoleOutput;
+    private readonly consolePanel: any
+    private readonly hardwiredConsoleOutput: HardwiredConsoleOutput;
 
     constructor(/*compilationPanel,*/  beautifyCommand, generateCommand, toggleCommand) {
 
@@ -165,7 +188,8 @@ class ConsoleInterface {
                                     //$('#panel-useocl-zone').append(token.text)
                                 }
                         },
-                        afterLine : (new_line) => {
+                        afterLine :
+                            (new_line) => {
                                 if (ENABLE_CONSOLE_OUTPUT_DISPLAY) {
                                     this.hardwiredConsoleOutput.append('\n')
                                     // $('#panel-useocl-zone').append('\n')

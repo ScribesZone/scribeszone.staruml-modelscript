@@ -1,10 +1,15 @@
+/**
+ * DEMO ELP = Element list panel
+ * This demp shows a list of elements
+ */
+// const electron = require('electron');
+//
+// // Module to control application life.
+// const app = electron.app
+declare var app
+
 import {ElementListPanel} from "../framework/panels"
 
-//------------- DEMOELP ----------------------------------------------
-// Demo. ELP = element list panel.
-// This demo shows a list of elements
-
-//
 const VIEW_TOGGLE_DEMOELP = 'view.toggle.demoelp'
 
 // Command in the "View" menu
@@ -15,13 +20,14 @@ const TOGGLE_DEMOELP_COMMAND = 'demos:toggle.demoelp'
 // IMPORTANT: this constant comes from menus/menu-tools.json
 const DEMO_ELP_COMMAND = 'demos:demoelp'
 
-class ElementListInterface {
+export class ElementListInterface {
     panel: any
     private updateCommand: any
     private toggleMenu: any
     private toggleCommand: any
 
     constructor() {
+        console.log('DG: Installing ElementListInterface')
         this.updateCommand = DEMO_ELP_COMMAND
         this.toggleMenu = VIEW_TOGGLE_DEMOELP
         this.toggleCommand = TOGGLE_DEMOELP_COMMAND

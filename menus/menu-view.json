@@ -11,6 +11,12 @@
           "id": "view.useocl.console",
           "type": "checkbox",
           "command": "useocl:toggle.console"
+        },
+        {
+          "label": "DEMO: ELP - Show ElementListPanel",
+          "id": "view.toggle.demoelp",
+          "type": "checkbox",
+          "command": "demos:toggle.demoelp"
         }
       ]
     }
