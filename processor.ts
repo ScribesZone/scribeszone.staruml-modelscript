@@ -145,7 +145,7 @@ class StateModelCompilation extends AbstractCompilation {
 }
 
 
-class USEOCLProcessor extends AbstractProcessor {
+export class USEOCLProcessor extends AbstractProcessor {
     private generator: any;
     private processorEnabled: any;
     private usePath: any;

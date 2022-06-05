@@ -51,7 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbstractCompilation = exports.ShellProcessorResult = void 0;
+exports.USEOCLProcessor = exports.AbstractCompilation = exports.ShellProcessorResult = void 0;
 var processors_1 = require("./framework/processors");
 var shell_1 = require("./framework/shell");
 var asts_1 = require("./framework/asts");
@@ -270,5 +270,6 @@ var USEOCLProcessor = /** @class */ (function (_super) {
     };
     return USEOCLProcessor;
 }(processors_1.AbstractProcessor));
+exports.USEOCLProcessor = USEOCLProcessor;
 exports.USEOCLProcessor = USEOCLProcessor;
 //# sourceMappingURL=processor.js.map
