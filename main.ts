@@ -3,17 +3,6 @@ declare var app
 require('./framework/misc')
 
 /**
- * Include the "Element List Panel" in the interface.
- */
-const INCLUDE_ELP_DEMO = true
-
-/**
- * Include a demo that generate ERD model creation. It shows how to create
- * ERD entities.
- */
-const INCLUDE_DBMODELGEN_DEMO = true /* ERD model creation demo */
-
-/**
  * Disaply console output during code generation. This is not good looking
  * since the result is displayed in the console with filenames and so on.
  */
@@ -25,7 +14,7 @@ const ENABLE_CONSOLE_OUTPUT_DISPLAY = false /* display in the code in console wi
  * all sources generated are in the same place as well. We should have
  * a drop down menu to select the file to be displayed for instance.
  */
-const ENABLE_CODE_INTERFACE = true
+const ENABLE_CODE_INTERFACE = false
 
 const ENABLE_PROCESSOR = true
 
@@ -309,30 +298,6 @@ function init() {
         GENERATE_COMMAND,
         TOGGLE_CONSOLE_COMMAND)
 
-
-
-    /*---------------------------------------------------------------------
-     *               DEMO ELP : ELEMENT LIST PANEL
-     *---------------------------------------------------------------------
-     */
-
-    if (INCLUDE_ELP_DEMO) {
-        const { ElementListInterface } = require("./demos/demo_elp")
-        new ElementListInterface()
-    }
-
-
-
-     /*--------------------------------------------------------------------
-     *               DEMO DBMODELGEN : Generator of a db model
-     *---------------------------------------------------------------------
-     * This demo shows how to create a database data model
-     */
-
-    if (INCLUDE_DBMODELGEN_DEMO) {
-        const { DemoDBModelGenerator} = require("./demos/demo_dbmodelgen")
-        new DemoDBModelGenerator()
-    }
 
 }
 

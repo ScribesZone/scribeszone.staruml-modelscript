@@ -2,15 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require('./framework/misc');
 /**
- * Include the "Element List Panel" in the interface.
- */
-var INCLUDE_ELP_DEMO = true;
-/**
- * Include a demo that generate ERD model creation. It shows how to create
- * ERD entities.
- */
-var INCLUDE_DBMODELGEN_DEMO = true; /* ERD model creation demo */
-/**
  * Disaply console output during code generation. This is not good looking
  * since the result is displayed in the console with filenames and so on.
  */
@@ -21,7 +12,7 @@ var ENABLE_CONSOLE_OUTPUT_DISPLAY = false; /* display in the code in console win
  * all sources generated are in the same place as well. We should have
  * a drop down menu to select the file to be displayed for instance.
  */
-var ENABLE_CODE_INTERFACE = true;
+var ENABLE_CODE_INTERFACE = false;
 var ENABLE_PROCESSOR = true;
 var panels_1 = require("./framework/panels");
 var renderer_1 = require("./framework/renderer");
@@ -230,23 +221,6 @@ function init() {
     new ConsoleInterface(
     // compilation_interface.getPanel(),
     BEAUTIFY_COMMAND, GENERATE_COMMAND, TOGGLE_CONSOLE_COMMAND);
-    /*---------------------------------------------------------------------
-     *               DEMO ELP : ELEMENT LIST PANEL
-     *---------------------------------------------------------------------
-     */
-    if (INCLUDE_ELP_DEMO) {
-        var ElementListInterface = require("./demos/demo_elp").ElementListInterface;
-        new ElementListInterface();
-    }
-    /*--------------------------------------------------------------------
-    *               DEMO DBMODELGEN : Generator of a db model
-    *---------------------------------------------------------------------
-    * This demo shows how to create a database data model
-    */
-    if (INCLUDE_DBMODELGEN_DEMO) {
-        var DemoDBModelGenerator = require("./demos/demo_dbmodelgen").DemoDBModelGenerator;
-        new DemoDBModelGenerator();
-    }
 }
 exports.init = init;
 //# sourceMappingURL=main.js.map
