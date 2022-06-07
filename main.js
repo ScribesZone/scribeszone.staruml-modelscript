@@ -51,6 +51,9 @@ var BEAUTIFY_COMMAND = EXTENSION.id + ':beautify';
 //         return this.panel
 //     }
 // }
+/**
+ * Generic way to make DOM element "element_ref" clickable.
+ */
 function addOnElementClickBehavior() {
     $('[element_ref]').click(function (event) {
         var element_id = (event.currentTarget.attributes['element_ref'].value);
@@ -158,7 +161,7 @@ var ConsoleInterface = /** @class */ (function () {
             _this.hardwiredConsoleOutput.newSectionHeader('Checking models ...');
             // this.consolePanel.setText('<div class="section">Checking model ...</div>')
             checker.doCheck();
-            // this.consolePanel.setText('Generating USE OCL files ...\n\n')
+            _this.hardwiredConsoleOutput.newSectionHeader('Generating USE OCL files ...\n\n');
             generator.doGenerate();
             addOnElementClickBehavior();
             // DEMO: this code is working properly
