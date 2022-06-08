@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CodeInterface = exports.CodeZone = exports.HTMLRenderer = void 0;
 var asts_1 = require("./asts");
 // Render a writer as an HTML structure. This class is
-// independant from any kind of interface. The HTML code can be
-// put in a regular web page. However no direct support is provided
+// independent of any kind of interface. The HTML code can be
+// put in a regular web page. However, no direct support is provided
 // for clicks on element. Use CodeZone to add behavior.
 var HTMLRenderer = /** @class */ (function () {
     function HTMLRenderer(ast) {

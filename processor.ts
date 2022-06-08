@@ -1,20 +1,11 @@
-import { AbstractProcessor } from "./framework/processors"
+import {
+    AbstractProcessor,
+    ProcessorResult,
+    ShellProcessorResult
+} from "./framework/processors"
+
 import { ShellCommand } from "./framework/shell"
 import { AST } from "./framework/asts"
-
-
-class ProcessorResult {
-}
-
-
-export class ShellProcessorResult extends ProcessorResult{
-    shellCommand: ShellCommand
-    constructor(shellCommand: ShellCommand) {
-        super()
-        this.shellCommand = shellCommand
-    }
-}
-
 
 function summarizeErrors(shellCommandResult) {
     if (shellCommandResult.hasErrors()) {

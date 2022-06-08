@@ -1,12 +1,13 @@
 "use strict";
 // noinspection UnnecessaryLocalVariableJS
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ASTCollection = exports.AST = exports.Line = exports.Token = exports.lineNumberPrefix = exports.CATEGORIES = exports.IDENTIFIER_CATEGORIES = void 0;
+exports.ASTCollection = exports.AST = exports.Line = exports.Token = exports.lineNumberPrefix = exports.IDENTIFIER_CATEGORIES = void 0;
+var fs = require("fs");
+var path = require("path");
 var misc_1 = require("./misc");
-var fs = require('fs');
-var path = require('path');
-var TraceErrorReporter = require('./traces').TraceErrorReporter;
-var asString = require("./models").asString;
+var traces_1 = require("./traces");
+var models_1 = require("./models");
+// This should be improved with typescript enumerations or something else
 exports.IDENTIFIER_CATEGORIES = [
     "identifier1",
     "identifier2",
@@ -15,69 +16,87 @@ exports.IDENTIFIER_CATEGORIES = [
     "reference1",
     "reference2"
 ];
-exports.CATEGORIES = [
-    "default",
-    "keyword",
-    "constant",
-    "comment",
-    "symbol"
-].concat(exports.IDENTIFIER_CATEGORIES);
 function isString(value) {
     return (typeof value === 'string' || value instanceof String);
 }
-function lineNumberPrefix(num, maxLineNumbers) {
+/**
+ * Pad a (line) number.
+ * Example:
+ *      lineNumberPrefix(45, 348) = " 45"
+ * 45 is the source line number, 348 the total number of line.
+ * @param num
+ * @param maxLineNumbers
+ * @param pad
+ */
+function lineNumberPrefix(num, maxLineNumbers, pad) {
+    if (pad === void 0) { pad = ' '; }
     if (num === undefined) {
-        new TraceErrorReporter('asts', "'num' of lineNumberPrefix() is undefined.", undefined).throw();
+        new traces_1.TraceErrorReporter('asts', "'num' of lineNumberPrefix() is undefined.", undefined).throw();
     }
     if (maxLineNumbers === undefined) {
-        new TraceErrorReporter('asts', "ERROR : 'maxLineNumbers' of lineNumberPrefix() is undefined.", undefined).throw();
+        new traces_1.TraceErrorReporter('asts', "ERROR : 'maxLineNumbers' of lineNumberPrefix() is undefined.", undefined).throw();
     }
     var max_digits = maxLineNumbers.toString().length;
     var space_prefix = " ".repeat(max_digits);
     var with_spaces = space_prefix + num;
-    var prefix = with_spaces.substr(with_spaces.length - max_digits);
+    var prefix = with_spaces.substring(with_spaces.length - max_digits);
     return prefix;
 }
 exports.lineNumberPrefix = lineNumberPrefix;
+/**
+ * Token
+ */
 var Token = /** @class */ (function () {
     function Token(line, text, category, element, eventFns) {
+        if (category === void 0) { category = "default"; }
         if (eventFns === void 0) { eventFns = undefined; }
-        if (!(line instanceof Line)) {
-            new TraceErrorReporter('asts', "First argument of Token must be a line \n"
-                + "Found: " + asString(line), eventFns).throw();
-        }
+        // @tscheck: redundant check with typescript
+        // if(! (line instanceof Line)) {
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         "First argument of Token must be a line \n"
+        //          + "Found: " + asString(line),
+        //         eventFns).throw()
+        // }
         this.line = line;
+        // @tscheck: redundant check with typescript
         // check text
-        if (!isString(text)) {
-            new TraceErrorReporter('asts', "Token text must be a string. \n"
-                + "Found: " + asString(text), eventFns).throw();
-        }
+        // if (! isString(text)) {
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         "Token text must be a string. \n"
+        //          + "Found: " + asString(text),
+        //         eventFns).throw()
+        // }
         if (text.split('\n').length >= 2) {
-            new TraceErrorReporter('asts', "Token text must not be multiline. \n"
+            new traces_1.TraceErrorReporter('asts', "Token text must not be multiline. \n"
                 + "Found: "
-                + asString(text.split('\n')[0] + "\\n ...'"), eventFns).throw();
+                + (0, models_1.asString)(text.split('\n')[0] + "\\n ...'"), eventFns).throw();
         }
         if (text.length === 0) {
-            new TraceErrorReporter('asts', "Token text must not be empty. \n"
+            new traces_1.TraceErrorReporter('asts', "Token text must not be empty. \n"
                 + "Found: ''", eventFns).throw();
         }
         this.text = text;
         // check category
-        var cat = (category === undefined ? "default" : category);
-        if (!exports.CATEGORIES.includes(cat)) {
-            var category_list = '[' + exports.CATEGORIES.join(', ') + ']';
-            new TraceErrorReporter('asts', 'Invalid token category.\n'
-                + 'Found :"' + asString(cat) + '"\n'
-                + 'Available categories are ' + category_list + '.\n'
-                + 'Token text was: ' + text, eventFns).throw();
-        }
-        this.category = cat;
+        // const cat = (category === undefined ? "default" : category)
+        // if (! CATEGORIES.includes(category)) {
+        //     const category_list = '['+CATEGORIES.join(', ')+']'
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         'Invalid token category.\n'
+        //         + 'Found :"' + asString(category) + '"\n'
+        //         + 'Available categories are '+category_list+'.\n'
+        //         + 'Token text was: ' + text,
+        //         eventFns).throw()
+        // }
+        this.category = category;
         // check element
         if (element !== undefined) {
             if (!(element instanceof type.Model)) {
-                new TraceErrorReporter('asts', 'Token element must be a type.Model element.\n'
+                new traces_1.TraceErrorReporter('asts', 'Token element must be a type.Model element.\n'
                     + 'Type found: ' + (typeof element) + '\n'
-                    + 'Value found: ' + asString(element), eventFns).throw();
+                    + 'Value found: ' + (0, models_1.asString)(element), eventFns).throw();
             }
         }
         this.element = element;
@@ -88,6 +107,9 @@ var Token = /** @class */ (function () {
     return Token;
 }());
 exports.Token = Token;
+/**
+ * Line, a sequence of token
+ */
 var Line = /** @class */ (function () {
     function Line(ast, number) {
         this.ast = ast;
@@ -103,15 +125,21 @@ var Line = /** @class */ (function () {
     return Line;
 }());
 exports.Line = Line;
+/**
+ * AST, Abstract Syntax Tree, represented as a sequence of lines.
+ */
 var AST = /** @class */ (function () {
     function AST(astCollection, filename, role, elements, debug, eventFns) {
         if (role === void 0) { role = "main"; }
         if (elements === void 0) { elements = []; }
         if (debug === void 0) { debug = false; }
         if (eventFns === void 0) { eventFns = null; }
-        console.assert(astCollection instanceof ASTCollection, astCollection);
-        console.assert(typeof filename === 'string' && filename, filename);
-        console.assert(typeof role === 'string', role);
+        // @tscheck:
+        // console.assert(
+        //     astCollection instanceof ASTCollection, astCollection)
+        // console.assert(
+        //     typeof filename === 'string' && filename, filename)
+        // console.assert(typeof role === 'string', role)
         console.assert(elements.every(function (element) { return element instanceof type.Model; }), elements);
         this.astCollection = astCollection;
         this.filename = filename;
@@ -123,7 +151,7 @@ var AST = /** @class */ (function () {
         this.isOpen = true;
         /**
          * Processor result optionally set and used by processor.
-         * This field is not used otherwise unless mentionned.
+         * This field is not used otherwise unless mentioned.
          * @type {null|ProcessorResult}
          */
         this.processorResult = null;
@@ -134,20 +162,20 @@ var AST = /** @class */ (function () {
     AST.prototype.write = function (text, category, element) {
         if (!isString(text)) {
             var message = ("First argument of write() must be a string. \n"
-                + "Found: " + asString(text));
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+                + "Found: " + (0, models_1.asString)(text));
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         if (text.split('\n').length >= 2) {
             var message = ("First argument of write() is invalid. \n"
                 + "Generators are token/line based."
                 + " Text must not contain \\n characters. \n"
                 + "Use writeln() instead.\n"
-                + "Found: " + asString(text.split('\n')[0] + '\\n' + '...'));
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+                + "Found: " + (0, models_1.asString)(text.split('\n')[0] + '\\n' + '...'));
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         if (!this.isOpen) {
             var message = ("AST has been closed by save(). No more token can be added");
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         if (text !== '') {
             var token = new Token(this.currentLine(), text, category, element, this.eventFns);
@@ -183,7 +211,7 @@ var AST = /** @class */ (function () {
     AST.prototype.save = function () {
         if (!this.isOpen) {
             var message = ("AST is not open. It cannot be saved.");
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         if (this.debug) {
             console.log('[ASTS]: **** saving output to "' + this.filename);
@@ -196,14 +224,14 @@ var AST = /** @class */ (function () {
             var message = ("Fail to create parent directory "
                 + parent_directory
                 + " for file " + this.filename);
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         try {
             fs.writeFileSync(this.filename, this.getPlainText());
         }
         catch (error) {
             var message = ("Fail to save AST file: " + this.filename);
-            new TraceErrorReporter('asts', message, this.eventFns).throw();
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
         }
         if (this.eventFns && this.eventFns['onSaveFile']) {
             this.eventFns['onSaveFile'](this.lines.length);
@@ -218,17 +246,16 @@ var ASTCollection = /** @class */ (function () {
         if (debug === void 0) { debug = false; }
         if (eventFns === void 0) { eventFns = undefined; }
         this.generator = generator;
-        this.astsByRole = {}; /* {role->[AST] */
-        this.astSequence = []; /* [AST] */
+        this.astsByRole = new Map();
+        this.astSequence = [];
         this.debug = debug;
         this.eventFns = eventFns;
         this.currentAST = null;
     }
     ASTCollection.prototype.openAST = function (filename, role, elements) {
         if (role === void 0) { role = 'main'; }
-        if (elements === void 0) { elements = []; }
-        console.assert(typeof filename === 'string', filename);
-        console.assert(typeof role === 'string', role);
+        //@tscheck: console.assert(typeof filename === 'string', filename)
+        //@tscheck: console.assert(typeof role === 'string', role)
         console.assert(elements.every(function (element) { return element instanceof type.Model; }), elements);
         var ast = new AST(this, filename, role, elements, this.debug, this.eventFns);
         if (this.astsByRole[role] === undefined) {
@@ -244,6 +271,11 @@ var ASTCollection = /** @class */ (function () {
         this.currentAST = ast;
     };
     ASTCollection.prototype.save = function () {
+        if (this.currentAST === null) {
+            var msg = 'ASTCollection.save() called but currentAST === null';
+            console.error('ERROR: ' + msg);
+            throw new Error('Internal error: ' + msg);
+        }
         this.currentAST.save();
     };
     ASTCollection.prototype.end = function () {
@@ -260,9 +292,4 @@ var ASTCollection = /** @class */ (function () {
     return ASTCollection;
 }());
 exports.ASTCollection = ASTCollection;
-// exports.CATEGORIES = CATEGORIES
-// exports.IDENTIFIER_CATEGORIES = IDENTIFIER_CATEGORIES
-// exports.AST = AST
-// exports.ASTCollection = ASTCollection
-// exports.lineNumberPrefix = lineNumberPrefix
 //# sourceMappingURL=asts.js.map

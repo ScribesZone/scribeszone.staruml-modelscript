@@ -1,3 +1,5 @@
+import {ShellCommand} from "./shell";
+
 
 export class AbstractProcessor {
     private debug: boolean;
@@ -26,4 +28,15 @@ export class AbstractProcessor {
     }
 }
 
-// exports.AbstractProcessor = AbstractProcessor
+export class ProcessorResult {
+
+}
+
+export class ShellProcessorResult extends ProcessorResult{
+    shellCommand: ShellCommand
+    constructor(shellCommand: ShellCommand) {
+        super()
+        this.shellCommand = shellCommand
+    }
+}
+

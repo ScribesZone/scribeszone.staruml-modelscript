@@ -1,10 +1,14 @@
-import { lineNumberPrefix, IDENTIFIER_CATEGORIES, AST } from './asts'
-import {CustomPanel} from "./panels";
+import {
+    lineNumberPrefix,
+    IDENTIFIER_CATEGORIES,
+    AST
+} from './asts'
+import { CustomPanel } from "./panels"
 declare var app : any
 
 // Render a writer as an HTML structure. This class is
-// independant from any kind of interface. The HTML code can be
-// put in a regular web page. However no direct support is provided
+// independent of any kind of interface. The HTML code can be
+// put in a regular web page. However, no direct support is provided
 // for clicks on element. Use CodeZone to add behavior.
 
 

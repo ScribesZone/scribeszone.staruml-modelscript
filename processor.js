@@ -51,25 +51,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.USEOCLProcessor = exports.AbstractCompilation = exports.ShellProcessorResult = void 0;
+exports.USEOCLProcessor = exports.AbstractCompilation = void 0;
 var processors_1 = require("./framework/processors");
 var shell_1 = require("./framework/shell");
 var asts_1 = require("./framework/asts");
-var ProcessorResult = /** @class */ (function () {
-    function ProcessorResult() {
-    }
-    return ProcessorResult;
-}());
-var ShellProcessorResult = /** @class */ (function (_super) {
-    __extends(ShellProcessorResult, _super);
-    function ShellProcessorResult(shellCommand) {
-        var _this = _super.call(this) || this;
-        _this.shellCommand = shellCommand;
-        return _this;
-    }
-    return ShellProcessorResult;
-}(ProcessorResult));
-exports.ShellProcessorResult = ShellProcessorResult;
 function summarizeErrors(shellCommandResult) {
     if (shellCommandResult.hasErrors()) {
         var nb_errors = shellCommandResult.stderr.split('/n').length;
@@ -116,7 +101,7 @@ var AbstractCompilation = /** @class */ (function () {
                         return [4 /*yield*/, shell_command.execute()];
                     case 1:
                         _a.sent();
-                        this.processorResult = new ShellProcessorResult(shell_command);
+                        this.processorResult = new processors_1.ShellProcessorResult(shell_command);
                         this.bindProcessorResult();
                         return [2 /*return*/, this.processorResult];
                 }

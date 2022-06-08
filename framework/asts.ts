@@ -1,13 +1,31 @@
 // noinspection UnnecessaryLocalVariableJS
 
-import {ensureDirectory} from "./misc";
-
 declare var type : any
 
-const fs = require('fs')
-const path = require('path')
-const { TraceErrorReporter } = require('./traces')
-const { asString } = require("./models")
+import * as fs from 'fs'
+import * as path from 'path'
+
+import { ensureDirectory } from "./misc"
+import { TraceErrorReporter } from './traces'
+import { asString } from "./models"
+import { ProcessorResult } from "./processors"
+
+type StarUMLModel = typeof type.Model
+
+export type Category =
+      "identifier1"
+    | "identifier2"
+    | "definition1"
+    | "definition2"
+    | "reference1"
+    | "reference2"
+    | "default"
+    | "keyword"
+    | "constant"
+    | "comment"
+    | "symbol"
+
+// This should be improved with typescript enumerations or something else
 
 export const IDENTIFIER_CATEGORIES = [
     "identifier1",
@@ -16,22 +34,29 @@ export const IDENTIFIER_CATEGORIES = [
     "definition2",
     "reference1",
     "reference2"
-]
+] as Array<Category> ;
 
-export const CATEGORIES = [
-    "default",
-    "keyword",
-    "constant",
-    "comment",
-    "symbol"
-].concat(IDENTIFIER_CATEGORIES)
 
-function isString(value) {
+
+
+function isString(value): boolean {
     return (typeof value === 'string' || value instanceof String)
 }
 
-
-export function lineNumberPrefix(num, maxLineNumbers) {
+/**
+ * Pad a (line) number.
+ * Example:
+ *      lineNumberPrefix(45, 348) = " 45"
+ * 45 is the source line number, 348 the total number of line.
+ * @param num
+ * @param maxLineNumbers
+ * @param pad
+ */
+export function lineNumberPrefix(
+    num: number,
+    maxLineNumbers: number,
+    pad: string = ' '
+): String {
     if (num === undefined) {
         new TraceErrorReporter(
             'asts',
@@ -47,41 +72,45 @@ export function lineNumberPrefix(num, maxLineNumbers) {
     const max_digits = maxLineNumbers.toString().length
     const space_prefix = " ".repeat(max_digits)
     const with_spaces = space_prefix + num
-    const prefix = with_spaces.substr(with_spaces.length-max_digits)
+    const prefix = with_spaces.substring(with_spaces.length-max_digits)
     return prefix
 }
 
-
+/**
+ * Token
+ */
 export class Token {
-    private line: Line
-    private text: string
-    private category: string
-    private element: any
+    public readonly line: Line
+    public readonly text: string
+    public readonly category: string
+    public readonly element: StarUMLModel | null
 
     constructor(
-        line,
+        line : Line,
         text: string,
-        category: string,
-        element,
+        category: Category = "default" as Category,
+        element : StarUMLModel | null,
         eventFns = undefined) {
 
-        if(! (line instanceof Line)) {
-            new TraceErrorReporter(
-                'asts',
-                "First argument of Token must be a line \n"
-                 + "Found: " + asString(line),
-                eventFns).throw()
-        }
+        // @tscheck: redundant check with typescript
+        // if(! (line instanceof Line)) {
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         "First argument of Token must be a line \n"
+        //          + "Found: " + asString(line),
+        //         eventFns).throw()
+        // }
         this.line = line
 
+        // @tscheck: redundant check with typescript
         // check text
-        if (! isString(text)) {
-            new TraceErrorReporter(
-                'asts',
-                "Token text must be a string. \n"
-                 + "Found: " + asString(text),
-                eventFns).throw()
-        }
+        // if (! isString(text)) {
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         "Token text must be a string. \n"
+        //          + "Found: " + asString(text),
+        //         eventFns).throw()
+        // }
         if (text.split('\n').length >= 2) {
             new TraceErrorReporter(
                 'asts',
@@ -100,18 +129,18 @@ export class Token {
         this.text = text
 
         // check category
-        const cat = (category === undefined ? "default" : category)
-        if (! CATEGORIES.includes(cat)) {
-            const category_list = '['+CATEGORIES.join(', ')+']'
-            new TraceErrorReporter(
-                'asts',
-                'Invalid token category.\n'
-                + 'Found :"' + asString(cat) + '"\n'
-                + 'Available categories are '+category_list+'.\n'
-                + 'Token text was: ' + text,
-                eventFns).throw()
-        }
-        this.category = cat
+        // const cat = (category === undefined ? "default" : category)
+        // if (! CATEGORIES.includes(category)) {
+        //     const category_list = '['+CATEGORIES.join(', ')+']'
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         'Invalid token category.\n'
+        //         + 'Found :"' + asString(category) + '"\n'
+        //         + 'Available categories are '+category_list+'.\n'
+        //         + 'Token text was: ' + text,
+        //         eventFns).throw()
+        // }
+        this.category = category
 
         // check element
         if (element !== undefined) {
@@ -132,19 +161,21 @@ export class Token {
     }
 }
 
-
+/**
+ * Line, a sequence of token
+ */
 export class Line {
-    private tokens: Token[]
-    private ast: AST
-    public number: bigint
+    public readonly tokens: Array<Token>
+    public readonly ast: AST
+    public readonly number: number
 
-    constructor(ast, number) {
+    constructor(ast: AST, number: number) {
         this.ast = ast
         this.tokens = []
         this.number = number
     }
 
-    addToken(token) {
+    addToken(token: Token) {
         this.tokens.push(token)
     }
 
@@ -153,29 +184,33 @@ export class Line {
     }
 }
 
-
+/**
+ * AST, Abstract Syntax Tree, represented as a sequence of lines.
+ */
 export class AST {
-    private astCollection: ASTCollection
-    filename: string
-    role: string
-    elements: any[];
-    lines: Line[];
-    private debug: boolean;
-    private eventFns: any;
-    private isOpen: boolean;
-    processorResult: any;
+    public readonly astCollection: ASTCollection
+    public readonly filename: string
+    public readonly role: string
+    public readonly elements: Array<StarUMLModel>
+    public readonly lines: Line[]
+    public isOpen: boolean
+    public processorResult: any
 
-    constructor( astCollection,
-                 filename,
-                 role = "main",
-                 elements = [],
-                 debug= false,
+    private readonly debug: boolean
+    private readonly eventFns: any
+
+    constructor( astCollection: ASTCollection,
+                 filename: string,
+                 role: string = "main",
+                 elements: Array<StarUMLModel> = [],
+                 debug: boolean= false,
                  eventFns = null) {
-        console.assert(
-            astCollection instanceof ASTCollection, astCollection)
-        console.assert(
-            typeof filename === 'string' && filename, filename)
-        console.assert(typeof role === 'string', role)
+        // @tscheck:
+        // console.assert(
+        //     astCollection instanceof ASTCollection, astCollection)
+        // console.assert(
+        //     typeof filename === 'string' && filename, filename)
+        // console.assert(typeof role === 'string', role)
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
@@ -189,7 +224,7 @@ export class AST {
         this.isOpen = true
         /**
          * Processor result optionally set and used by processor.
-         * This field is not used otherwise unless mentionned.
+         * This field is not used otherwise unless mentioned.
          * @type {null|ProcessorResult}
          */
         this.processorResult = null
@@ -314,27 +349,29 @@ export class AST {
 
 
 export class ASTCollection {
-    private generator: any;
-    private astsByRole: {};
-    private astSequence: any[];
-    private debug: boolean;
-    private eventFns: any;
-    private currentAST: AST;
+    public readonly astSequence: Array<AST>
+    public readonly astsByRole: Map<string, Array<AST>>
+    public currentAST: AST | null
+    public readonly generator: any
+
+    private readonly debug: boolean
+    private readonly eventFns: any
+
 
     constructor(generator,
                  debug= false,
                  eventFns = undefined) {
         this.generator = generator
-        this.astsByRole = {}  /* {role->[AST] */
-        this.astSequence = [] /* [AST] */
+        this.astsByRole = new Map()
+        this.astSequence = []
         this.debug = debug
         this.eventFns = eventFns
         this.currentAST = null
     }
 
-    openAST(filename, role='main', elements = []) {
-        console.assert(typeof filename === 'string', filename)
-        console.assert(typeof role === 'string', role)
+    openAST(filename: string, role: string='main', elements: Array<StarUMLModel>) {
+        //@tscheck: console.assert(typeof filename === 'string', filename)
+        //@tscheck: console.assert(typeof role === 'string', role)
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
@@ -360,6 +397,11 @@ export class ASTCollection {
     }
 
     save() {
+        if (this.currentAST === null) {
+            const msg = 'ASTCollection.save() called but currentAST === null'
+            console.error('ERROR: '+msg)
+            throw new Error('Internal error: '+msg)
+        }
         this.currentAST.save()
     }
 
@@ -380,9 +422,3 @@ export class ASTCollection {
     }
 
 }
-
-// exports.CATEGORIES = CATEGORIES
-// exports.IDENTIFIER_CATEGORIES = IDENTIFIER_CATEGORIES
-// exports.AST = AST
-// exports.ASTCollection = ASTCollection
-// exports.lineNumberPrefix = lineNumberPrefix
