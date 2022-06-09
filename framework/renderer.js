@@ -8,35 +8,36 @@ var asts_1 = require("./asts");
 // for clicks on element. Use CodeZone to add behavior.
 var HTMLRenderer = /** @class */ (function () {
     function HTMLRenderer(ast) {
-        if (ast === undefined) {
-            throw "ERROR : 'ast' of HTMLRenderer is undefined.";
-        }
+        // @tscheck
+        // if (ast === undefined) {
+        //     throw "ERROR : 'ast' of HTMLRenderer is undefined."
+        // }
         this.ast = ast;
     }
     HTMLRenderer.prototype.getHTMLForToken = function (token) {
-        if (token === undefined) {
-            throw "ERROR : 'token' of getHTMLForToken is undefined.";
-        }
+        // @tscheck
+        // if (token === undefined) {
+        //     throw "ERROR : 'token' of getHTMLForToken is undefined."
+        // }
         if (token.element) {
-            var html = ('<a href="#" class="{{category-token}}" element="{{id}}">{{text}}</a>'
+            return ('<a href="#" class="{{category-token}}" element="{{id}}">{{text}}</a>'
                 // @ts-ignore   TODO .replaceAll
                 .replaceAll("{{id}}", token.element._id)
                 .replaceAll("{{category-token}}", this._getCategoryClass(token.category))
                 .replaceAll("{{text}}", token.text));
-            return html;
         }
         else {
-            var html = ('<span class="token-{{category}}">{{text}}</span>'
+            return ('<span class="token-{{category}}">{{text}}</span>'
                 // @ts-ignore   TODO .replaceAll
                 .replaceAll("{{category}}", token.category)
                 .replaceAll("{{text}}", token.text));
-            return html;
         }
     };
     HTMLRenderer.prototype.getHTMLForLineNumber = function (num) {
-        if (num === undefined) {
-            throw "ERROR : parameter 'num' of getHTMLForLineNumber is undefined.";
-        }
+        // @tscheck
+        // if (num === undefined) {
+        //     throw "ERROR : parameter 'num' of getHTMLForLineNumber is undefined."
+        // }
         var max_lines = this.ast.lines.length;
         var line_number_pad = (0, asts_1.lineNumberPrefix)(num, max_lines);
         return ('<span class="line-number">{{pad}} </span>'
@@ -45,9 +46,10 @@ var HTMLRenderer = /** @class */ (function () {
     };
     HTMLRenderer.prototype.getHTMLForLine = function (line) {
         var _this = this;
-        if (line === undefined) {
-            throw "ERROR : 'line' of getHTMLForLine is undefined.";
-        }
+        // @tscheck
+        // if (line === undefined) {
+        //     throw "ERROR : 'line' of getHTMLForLine is undefined."
+        // }
         var prefix = ('<span id="line-{{num}}" class="line" line="{{num}}">'
             + '{{pad_number}}'
             + '{{body}}'
@@ -113,8 +115,7 @@ var CodeZone = /** @class */ (function () {
         }
         this.ast = ast;
         this.renderer = new HTMLRenderer(this.ast);
-        var html = this.renderer.getHTML();
-        this.$container.innerHTML = html;
+        this.$container.innerHTML = this.renderer.getHTML();
         this._addOnClickBehavior();
         if (false) { // TEST:
             this.__testHighligthtLine();
@@ -200,7 +201,4 @@ exports.CodeInterface = CodeInterface;
 //     $("body").scrollTop(position - (windowHeight/2));
 //   }
 // });
-exports.Renderer = HTMLRenderer;
-exports.CodeZone = CodeZone;
-exports.CodeInterface = CodeInterface;
 //# sourceMappingURL=renderer.js.map

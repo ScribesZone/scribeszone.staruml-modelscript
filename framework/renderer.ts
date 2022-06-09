@@ -1,9 +1,13 @@
 import {
-    lineNumberPrefix,
+    Token,
+    Line,
+    AST,
     IDENTIFIER_CATEGORIES,
-    AST
+    lineNumberPrefix
 } from './asts'
-import { CustomPanel } from "./panels"
+
+import {CustomPanel} from "./panels"
+
 declare var app : any
 
 // Render a writer as an HTML structure. This class is
@@ -13,42 +17,44 @@ declare var app : any
 
 
 export class HTMLRenderer {
-    private ast: any;
 
-    constructor(ast) {
-        if (ast === undefined) {
-            throw "ERROR : 'ast' of HTMLRenderer is undefined."
-        }
+    private readonly ast: AST
+
+    constructor(ast : AST) {
+        // @tscheck
+        // if (ast === undefined) {
+        //     throw "ERROR : 'ast' of HTMLRenderer is undefined."
+        // }
         this.ast = ast
     }
 
-    getHTMLForToken(token) {
-        if (token === undefined) {
-            throw "ERROR : 'token' of getHTMLForToken is undefined."
-        }
+    getHTMLForToken(token : Token): string {
+        // @tscheck
+        // if (token === undefined) {
+        //     throw "ERROR : 'token' of getHTMLForToken is undefined."
+        // }
         if (token.element) {
-            const html = (
+           return (
                 '<a href="#" class="{{category-token}}" element="{{id}}">{{text}}</a>'
                     // @ts-ignore   TODO .replaceAll
                     .replaceAll("{{id}}",  token.element._id)
                     .replaceAll("{{category-token}}",
                         this._getCategoryClass(token.category))
                     .replaceAll("{{text}}", token.text))
-            return html
         } else {
-            const html = (
+            return (
                 '<span class="token-{{category}}">{{text}}</span>'
                     // @ts-ignore   TODO .replaceAll
                     .replaceAll("{{category}}", token.category)
                     .replaceAll("{{text}}", token.text))
-            return html
         }
     }
 
-    getHTMLForLineNumber(num) {
-        if (num === undefined) {
-            throw "ERROR : parameter 'num' of getHTMLForLineNumber is undefined."
-        }
+    getHTMLForLineNumber(num : number):string {
+        // @tscheck
+        // if (num === undefined) {
+        //     throw "ERROR : parameter 'num' of getHTMLForLineNumber is undefined."
+        // }
         const max_lines = this.ast.lines.length
         const line_number_pad = lineNumberPrefix(num, max_lines)
         return (
@@ -57,10 +63,11 @@ export class HTMLRenderer {
                 .replaceAll("{{pad}}",line_number_pad))
     }
 
-    getHTMLForLine(line) {
-        if (line === undefined) {
-            throw "ERROR : 'line' of getHTMLForLine is undefined."
-        }
+    getHTMLForLine(line: Line): string {
+        // @tscheck
+        // if (line === undefined) {
+        //     throw "ERROR : 'line' of getHTMLForLine is undefined."
+        // }
         const prefix = (
             '<span id="line-{{num}}" class="line" line="{{num}}">'
             + '{{pad_number}}'
@@ -105,7 +112,6 @@ export class HTMLRenderer {
             })
             .join(', '))
     }
-
 }
 
 /**
@@ -137,8 +143,7 @@ export class CodeZone {
         }
         this.ast = ast
         this.renderer = new HTMLRenderer(this.ast)
-        const html = this.renderer.getHTML()
-        this.$container.innerHTML = html
+        this.$container.innerHTML = this.renderer.getHTML()
         this._addOnClickBehavior()
         if (false) { // TEST:
             this.__testHighligthtLine()
@@ -239,8 +244,3 @@ export class CodeInterface {
 //     $("body").scrollTop(position - (windowHeight/2));
 //   }
 // });
-
-
-exports.Renderer = HTMLRenderer
-exports.CodeZone = CodeZone
-exports.CodeInterface = CodeInterface

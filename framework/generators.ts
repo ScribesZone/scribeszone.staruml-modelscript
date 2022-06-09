@@ -2,17 +2,20 @@ declare var type : any
 declare var app : any
 
 import * as path from "path"
-import { ASTCollection } from "./asts"
-const { asString } = require("./models")
+
+import * as staruml from './staruml'
+
+import {AST, ASTCollection, Category} from "./asts"
+import { asString } from "./models"
 import { TraceErrorReporter, TracedError } from './traces'
 
 
-const generatorStatus = {
-    UNDEFINED : "undefined",
-    OK : "ok",
-    EXCEPTION : "exception",
-    PRECONDITION_FAILED : "precondition failed",
-    UNAMED_PROJECT : ''
+export enum GeneratorStatus {
+    UNDEFINED = "undefined",
+    OK = "ok",
+    EXCEPTION = "exception",
+    PRECONDITION_FAILED = "precondition failed",
+    UNNAMED_PROJECT = ''
 }
 
 
@@ -26,26 +29,29 @@ const generatorStatus = {
 // TODO: add generation precondition handling
 
 /**
+ * AbstractGenerator.
  * This class serves as a base class for developer written generators.
+ * A generator create some ASTCollection (possibly with only one AST).
  * Its contains convenience methods that make it simple to
  * open/write/save AST without knowing of AST and ASTCollections.
  * the details of the AS
  */
-class AbstractGenerator {
-    private debug: boolean
-    private eventFns: any
-    private astCollection: any
-    private postGenerateFun: any
-    private status: string
-    private errorMessage: any
+export abstract class AbstractGenerator {
+    public readonly astCollection: ASTCollection
+    public status: string
+    public errorMessage: string |  null
+    
+    private readonly debug: boolean     
+    private eventFns: any // TODO: to be typed
+    private postGenerateFun: Function | null
 
-    constructor(debug = true,
-                eventFns = undefined) {
+    protected constructor(debug = true,
+                          eventFns = undefined) {
+        this.astCollection = new ASTCollection(this, debug, eventFns)
+        this.status = GeneratorStatus.UNDEFINED
         this.debug = debug
         this.eventFns = eventFns
-        this.astCollection = new ASTCollection(this, debug, eventFns)
         this.postGenerateFun = null
-        this.status = generatorStatus.UNDEFINED
         this.errorMessage = null
     }
 
@@ -53,10 +59,11 @@ class AbstractGenerator {
      * Generate the code. This method must be written by developer
      * generator.
      */
-    generate() {
-        console.assert(arguments.length === 0)
-        throw new Error('generate() is not implemented by generator')
-    }
+    abstract generate(): void
+    // generate(): void {
+    //     console.assert(arguments.length === 0)
+    //     throw new Error('generate() is not implemented by generator')
+    // }
 
 
 
@@ -66,6 +73,10 @@ class AbstractGenerator {
      * Helper to compute easily output file base on
      * project file using its path and basename
      * (for instance /h/zarwinn/proj.mdj
+     *
+     * @param extension extension of the generated file.
+     * @param relativeDirectory directory where the file as to be saved.
+     * @param basename the name of the file. See below.
      *
      * relativeDirectory is appended to the path. Default to
      * "." so by default the output file will be in the same
@@ -81,19 +92,21 @@ class AbstractGenerator {
      *   f('.use','mod/a') = /h/zarwinn/mod/a/proj.use
      *   f('.java','mod/a', 'person') = /h/zarwinn/mod/a/person.java
      */
+
     getProjectBasedFilename(
-            extension,
-            relativeDirectory = '.',
-            basename = null) {
-        console.assert(
-            typeof extension === 'string'
-            && extension[0] === ".",
-            extension)
-        console.assert(
-            typeof relativeDirectory === 'string', relativeDirectory)
-        console.assert(
-            basename === null
-            || typeof basename === 'string', basename)
+            extension: string,
+            relativeDirectory: string = '.',
+            basename: string | null = null) {
+        // @tscheck
+        // console.assert(
+        //     typeof extension === 'string'
+        //     && extension[0] === ".",
+        //     extension)
+        // console.assert(
+        //     typeof relativeDirectory === 'string', relativeDirectory)
+        // console.assert(
+        //     basename === null
+        //     || typeof basename === 'string', basename)
         const parts = path.parse(app.project.filename)
         const fileDirectory = path.join(parts.dir, relativeDirectory)
         const fileBasename = (basename ? basename : parts.name)
@@ -105,14 +118,19 @@ class AbstractGenerator {
 
     //---------------------------------------------------------------------
     // methods wrapping AST and ASTCollection
-    // Provided from developer convenience. These methods calls
+    // Provided from developer convenience. These methods call
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
 
-    openAST(filename, role="main", elements= []) {
-        console.assert(typeof filename === 'string', filename)
-        console.assert(typeof role === 'string', role)
-        console.assert(elements instanceof Array, elements)
+    openAST(
+        filename: string,
+        role: string = "main",
+        elements: Array<staruml.Element> = []
+    ) : AST  {
+        // @tscheck
+        // console.assert(typeof filename === 'string', filename)
+        // console.assert(typeof role === 'string', role)
+        // console.assert(elements instanceof Array, elements)
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
@@ -126,23 +144,48 @@ class AbstractGenerator {
         this.astCollection.reopenAST(ast)
     }
 
-    write(text, category=undefined, element=undefined) {
-        this.astCollection.currentAST.write(text, category, element)
+    private checkCurrentAST() {
+        if (this.astCollection.currentAST === null) {
+            const message = "currentAST is null."
+            new TraceErrorReporter(
+                'asts',
+                message,
+                this.eventFns).throw()
+        }
     }
 
-    writeln(text=undefined, category=undefined, element=undefined) {
-        this.astCollection.currentAST.writeln(text, category, element)
+    write(
+        text: string,
+        category: Category = "default",
+        element: staruml.Model | null = null
+    ): void {
+        this.checkCurrentAST()
+        this.astCollection.currentAST!.write(text, category, element)
     }
 
-    writeIdentifier(text, element) {
-        this.astCollection.currentAST.write(text, 'identifier1', element)
+    writeln(
+        text: string,
+        category: Category = "default",
+        element: staruml.Model | null = null
+    ): void {
+        this.checkCurrentAST()
+        this.astCollection.currentAST!.writeln(text, category, element)
     }
 
-    save() {
-        this.astCollection.currentAST.save()
+    writeIdentifier(
+        text: string,
+        element : staruml.Model | null = null
+    ): void {
+        this.checkCurrentAST()
+        this.astCollection.currentAST!.write(text, 'identifier1', element)
     }
 
-    end() {
+    save(): void {
+        this.checkCurrentAST()
+        this.astCollection.currentAST!.save()
+    }
+
+    end(): void {
         this.astCollection.end()
     }
 
@@ -156,25 +199,27 @@ class AbstractGenerator {
 
 
 
-    getPlainText() {
-        return this.astCollection.currentAST.getPlainText()
+    getPlainText(): string {
+        this.checkCurrentAST()
+        return this.astCollection.currentAST!.getPlainText()
     }
 
-    getLineNumberedText() {
-        return this.astCollection.currentAST.getLineNumberedText()
+    getLineNumberedText(): string {
+        this.checkCurrentAST()
+        return this.astCollection.currentAST!.getLineNumberedText()
     }
 
-    getErrorMessage() {
+    getErrorMessage(): string | null {
         return this.errorMessage
     }
 
     /**
      * Check a precondition for the doGenerate function to run.
-     * Return true if the precondition is full filled other wize
+     * Return true if the precondition is full filled otherwise
      * return as a string an error message.
      * @returns {string|boolean}
      */
-    checkPrecondition() {
+    checkPrecondition() {  // TODO: check type
         if (false) {
             return "TEST: FAKE PRECONDITION FAILURE MESSAGE" // TEST:
         }
@@ -182,6 +227,7 @@ class AbstractGenerator {
     }
 
     showError() {
+        this.checkCurrentAST()
         this.errorMessage.split('\n').reverse().forEach( line => {
                 app.toast.error(line, 120);
             }
@@ -198,7 +244,7 @@ class AbstractGenerator {
     }
 
     isGenerationSuccessful() {
-        return this.status === generatorStatus.OK
+        return this.status === GeneratorStatus.OK
     }
 
     postGenerate(fun) {
@@ -207,14 +253,14 @@ class AbstractGenerator {
 
     doGenerate() {
         if (! app.project.filename) {
-            this.status = generatorStatus.UNAMED_PROJECT
+            this.status = GeneratorStatus.UNNAMED_PROJECT
             this.errorMessage = "Project not saved. Generation cancelled."
             this.showError()
             return
         }
         const precondition = this.checkPrecondition()
         if ( precondition !== true) {
-            this.status = generatorStatus.PRECONDITION_FAILED
+            this.status = GeneratorStatus.PRECONDITION_FAILED
             this.errorMessage = precondition
             this.showError()
             return
@@ -224,7 +270,7 @@ class AbstractGenerator {
                 throw Error('FAKE GENERATION FAILURE')
             }
             this.generate()
-            this.status = generatorStatus.OK
+            this.status = GeneratorStatus.OK
             this.showSuccess()
             if (this.debug) {
                 console.log('[GENERATOR]: ASTCollection stats :',
@@ -237,7 +283,7 @@ class AbstractGenerator {
                     "Generation failed. An error was reported by "
                     + error.component + " component.\n"
                     + "Use DevTools for more information : Alt+Shift+T")
-                this.status = generatorStatus.EXCEPTION
+                this.status = GeneratorStatus.EXCEPTION
                 this.showError()
                 throw error
             } else {
@@ -246,7 +292,7 @@ class AbstractGenerator {
                     "Generation fails with an exception:\n"
                     + error.message + '\n'
                     + "Use DevTools to see issues : Alt+Shift+T")
-                this.status = generatorStatus.EXCEPTION
+                this.status = GeneratorStatus.EXCEPTION
                 this.showError()
                 new TraceErrorReporter('generator', error, this.eventFns).throw()
             }
@@ -307,5 +353,3 @@ class AbstractGenerator {
     }
 }
 
-exports.AbstractGenerator = AbstractGenerator
-exports.status = generatorStatus

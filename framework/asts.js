@@ -49,6 +49,7 @@ exports.lineNumberPrefix = lineNumberPrefix;
 var Token = /** @class */ (function () {
     function Token(line, text, category, element, eventFns) {
         if (category === void 0) { category = "default"; }
+        if (element === void 0) { element = null; }
         if (eventFns === void 0) { eventFns = undefined; }
         // @tscheck: redundant check with typescript
         // if(! (line instanceof Line)) {
@@ -92,7 +93,7 @@ var Token = /** @class */ (function () {
         // }
         this.category = category;
         // check element
-        if (element !== undefined) {
+        if (element !== null) {
             if (!(element instanceof type.Model)) {
                 new traces_1.TraceErrorReporter('asts', 'Token element must be a type.Model element.\n'
                     + 'Type found: ' + (typeof element) + '\n'
@@ -160,11 +161,18 @@ var AST = /** @class */ (function () {
         return this.lines[this.lines.length - 1];
     };
     AST.prototype.write = function (text, category, element) {
-        if (!isString(text)) {
-            var message = ("First argument of write() must be a string. \n"
-                + "Found: " + (0, models_1.asString)(text));
-            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
-        }
+        if (category === void 0) { category = "default"; }
+        if (element === void 0) { element = null; }
+        // @tscheck
+        // if (! isString(text)) {
+        //     const message = (
+        //         "First argument of write() must be a string. \n"
+        //          + "Found: " + asString(text))
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         message,
+        //         this.eventFns).throw()
+        // }
         if (text.split('\n').length >= 2) {
             var message = ("First argument of write() is invalid. \n"
                 + "Generators are token/line based."
@@ -189,6 +197,7 @@ var AST = /** @class */ (function () {
         }
     };
     AST.prototype.writeln = function (text, category, element) {
+        if (element === void 0) { element = null; }
         if (text !== undefined) {
             this.write(text, category, element);
         }
@@ -254,14 +263,15 @@ var ASTCollection = /** @class */ (function () {
     }
     ASTCollection.prototype.openAST = function (filename, role, elements) {
         if (role === void 0) { role = 'main'; }
+        if (elements === void 0) { elements = []; }
         //@tscheck: console.assert(typeof filename === 'string', filename)
         //@tscheck: console.assert(typeof role === 'string', role)
         console.assert(elements.every(function (element) { return element instanceof type.Model; }), elements);
         var ast = new AST(this, filename, role, elements, this.debug, this.eventFns);
-        if (this.astsByRole[role] === undefined) {
-            this.astsByRole[role] = [];
+        if (!this.astsByRole.has(role)) {
+            this.astsByRole.set(role, []);
         }
-        this.astsByRole[role].push(ast);
+        this.astsByRole.get(role).push(ast);
         this.astSequence.push(ast);
         this.currentAST = ast;
         return ast;

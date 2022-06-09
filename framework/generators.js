@@ -1,16 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AbstractGenerator = exports.GeneratorStatus = void 0;
 var path = require("path");
 var asts_1 = require("./asts");
-var asString = require("./models").asString;
+var models_1 = require("./models");
 var traces_1 = require("./traces");
-var generatorStatus = {
-    UNDEFINED: "undefined",
-    OK: "ok",
-    EXCEPTION: "exception",
-    PRECONDITION_FAILED: "precondition failed",
-    UNAMED_PROJECT: ''
-};
+var GeneratorStatus;
+(function (GeneratorStatus) {
+    GeneratorStatus["UNDEFINED"] = "undefined";
+    GeneratorStatus["OK"] = "ok";
+    GeneratorStatus["EXCEPTION"] = "exception";
+    GeneratorStatus["PRECONDITION_FAILED"] = "precondition failed";
+    GeneratorStatus["UNNAMED_PROJECT"] = "";
+})(GeneratorStatus = exports.GeneratorStatus || (exports.GeneratorStatus = {}));
 /*=========================================================================
 *             Generators
 * =========================================================================
@@ -18,7 +20,9 @@ var generatorStatus = {
 // TODO: add generation status
 // TODO: add generation precondition handling
 /**
+ * AbstractGenerator.
  * This class serves as a base class for developer written generators.
+ * A generator create some ASTCollection (possibly with only one AST).
  * Its contains convenience methods that make it simple to
  * open/write/save AST without knowing of AST and ASTCollections.
  * the details of the AS
@@ -27,26 +31,26 @@ var AbstractGenerator = /** @class */ (function () {
     function AbstractGenerator(debug, eventFns) {
         if (debug === void 0) { debug = true; }
         if (eventFns === void 0) { eventFns = undefined; }
+        this.astCollection = new asts_1.ASTCollection(this, debug, eventFns);
+        this.status = GeneratorStatus.UNDEFINED;
         this.debug = debug;
         this.eventFns = eventFns;
-        this.astCollection = new asts_1.ASTCollection(this, debug, eventFns);
         this.postGenerateFun = null;
-        this.status = generatorStatus.UNDEFINED;
         this.errorMessage = null;
     }
-    /**
-     * Generate the code. This method must be written by developer
-     * generator.
-     */
-    AbstractGenerator.prototype.generate = function () {
-        console.assert(arguments.length === 0);
-        throw new Error('generate() is not implemented by generator');
-    };
+    // generate(): void {
+    //     console.assert(arguments.length === 0)
+    //     throw new Error('generate() is not implemented by generator')
+    // }
     // TODO: move this function to misc module
     /**
      * Helper to compute easily output file base on
      * project file using its path and basename
      * (for instance /h/zarwinn/proj.mdj
+     *
+     * @param extension extension of the generated file.
+     * @param relativeDirectory directory where the file as to be saved.
+     * @param basename the name of the file. See below.
      *
      * relativeDirectory is appended to the path. Default to
      * "." so by default the output file will be in the same
@@ -65,11 +69,16 @@ var AbstractGenerator = /** @class */ (function () {
     AbstractGenerator.prototype.getProjectBasedFilename = function (extension, relativeDirectory, basename) {
         if (relativeDirectory === void 0) { relativeDirectory = '.'; }
         if (basename === void 0) { basename = null; }
-        console.assert(typeof extension === 'string'
-            && extension[0] === ".", extension);
-        console.assert(typeof relativeDirectory === 'string', relativeDirectory);
-        console.assert(basename === null
-            || typeof basename === 'string', basename);
+        // @tscheck
+        // console.assert(
+        //     typeof extension === 'string'
+        //     && extension[0] === ".",
+        //     extension)
+        // console.assert(
+        //     typeof relativeDirectory === 'string', relativeDirectory)
+        // console.assert(
+        //     basename === null
+        //     || typeof basename === 'string', basename)
         var parts = path.parse(app.project.filename);
         var fileDirectory = path.join(parts.dir, relativeDirectory);
         var fileBasename = (basename ? basename : parts.name);
@@ -78,36 +87,47 @@ var AbstractGenerator = /** @class */ (function () {
     };
     //---------------------------------------------------------------------
     // methods wrapping AST and ASTCollection
-    // Provided from developer convenience. These methods calls
+    // Provided from developer convenience. These methods call
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
     AbstractGenerator.prototype.openAST = function (filename, role, elements) {
         if (role === void 0) { role = "main"; }
         if (elements === void 0) { elements = []; }
-        console.assert(typeof filename === 'string', filename);
-        console.assert(typeof role === 'string', role);
-        console.assert(elements instanceof Array, elements);
+        // @tscheck
+        // console.assert(typeof filename === 'string', filename)
+        // console.assert(typeof role === 'string', role)
+        // console.assert(elements instanceof Array, elements)
         console.assert(elements.every(function (element) { return element instanceof type.Model; }), elements);
         return this.astCollection.openAST(filename, role, elements);
     };
     AbstractGenerator.prototype.reopenAST = function (ast) {
         this.astCollection.reopenAST(ast);
     };
+    AbstractGenerator.prototype.checkCurrentAST = function () {
+        if (this.astCollection.currentAST === null) {
+            var message = "currentAST is null.";
+            new traces_1.TraceErrorReporter('asts', message, this.eventFns).throw();
+        }
+    };
     AbstractGenerator.prototype.write = function (text, category, element) {
-        if (category === void 0) { category = undefined; }
-        if (element === void 0) { element = undefined; }
+        if (category === void 0) { category = "default"; }
+        if (element === void 0) { element = null; }
+        this.checkCurrentAST();
         this.astCollection.currentAST.write(text, category, element);
     };
     AbstractGenerator.prototype.writeln = function (text, category, element) {
-        if (text === void 0) { text = undefined; }
-        if (category === void 0) { category = undefined; }
-        if (element === void 0) { element = undefined; }
+        if (category === void 0) { category = "default"; }
+        if (element === void 0) { element = null; }
+        this.checkCurrentAST();
         this.astCollection.currentAST.writeln(text, category, element);
     };
     AbstractGenerator.prototype.writeIdentifier = function (text, element) {
+        if (element === void 0) { element = null; }
+        this.checkCurrentAST();
         this.astCollection.currentAST.write(text, 'identifier1', element);
     };
     AbstractGenerator.prototype.save = function () {
+        this.checkCurrentAST();
         this.astCollection.currentAST.save();
     };
     AbstractGenerator.prototype.end = function () {
@@ -119,9 +139,11 @@ var AbstractGenerator = /** @class */ (function () {
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
     AbstractGenerator.prototype.getPlainText = function () {
+        this.checkCurrentAST();
         return this.astCollection.currentAST.getPlainText();
     };
     AbstractGenerator.prototype.getLineNumberedText = function () {
+        this.checkCurrentAST();
         return this.astCollection.currentAST.getLineNumberedText();
     };
     AbstractGenerator.prototype.getErrorMessage = function () {
@@ -129,7 +151,7 @@ var AbstractGenerator = /** @class */ (function () {
     };
     /**
      * Check a precondition for the doGenerate function to run.
-     * Return true if the precondition is full filled other wize
+     * Return true if the precondition is full filled otherwise
      * return as a string an error message.
      * @returns {string|boolean}
      */
@@ -140,6 +162,7 @@ var AbstractGenerator = /** @class */ (function () {
         return true;
     };
     AbstractGenerator.prototype.showError = function () {
+        this.checkCurrentAST();
         this.errorMessage.split('\n').reverse().forEach(function (line) {
             app.toast.error(line, 120);
         });
@@ -152,21 +175,21 @@ var AbstractGenerator = /** @class */ (function () {
         return this.status;
     };
     AbstractGenerator.prototype.isGenerationSuccessful = function () {
-        return this.status === generatorStatus.OK;
+        return this.status === GeneratorStatus.OK;
     };
     AbstractGenerator.prototype.postGenerate = function (fun) {
         this.postGenerateFun = fun;
     };
     AbstractGenerator.prototype.doGenerate = function () {
         if (!app.project.filename) {
-            this.status = generatorStatus.UNAMED_PROJECT;
+            this.status = GeneratorStatus.UNNAMED_PROJECT;
             this.errorMessage = "Project not saved. Generation cancelled.";
             this.showError();
             return;
         }
         var precondition = this.checkPrecondition();
         if (precondition !== true) {
-            this.status = generatorStatus.PRECONDITION_FAILED;
+            this.status = GeneratorStatus.PRECONDITION_FAILED;
             this.errorMessage = precondition;
             this.showError();
             return;
@@ -176,10 +199,10 @@ var AbstractGenerator = /** @class */ (function () {
                 throw Error('FAKE GENERATION FAILURE');
             }
             this.generate();
-            this.status = generatorStatus.OK;
+            this.status = GeneratorStatus.OK;
             this.showSuccess();
             if (this.debug) {
-                console.log('[GENERATOR]: ASTCollection stats :', asString(this.astCollection.getStats()));
+                console.log('[GENERATOR]: ASTCollection stats :', (0, models_1.asString)(this.astCollection.getStats()));
             }
         }
         catch (error) {
@@ -188,7 +211,7 @@ var AbstractGenerator = /** @class */ (function () {
                 this.errorMessage = ("Generation failed. An error was reported by "
                     + error.component + " component.\n"
                     + "Use DevTools for more information : Alt+Shift+T");
-                this.status = generatorStatus.EXCEPTION;
+                this.status = GeneratorStatus.EXCEPTION;
                 this.showError();
                 throw error;
             }
@@ -197,7 +220,7 @@ var AbstractGenerator = /** @class */ (function () {
                 this.errorMessage = ("Generation fails with an exception:\n"
                     + error.message + '\n'
                     + "Use DevTools to see issues : Alt+Shift+T");
-                this.status = generatorStatus.EXCEPTION;
+                this.status = GeneratorStatus.EXCEPTION;
                 this.showError();
                 new traces_1.TraceErrorReporter('generator', error, this.eventFns).throw();
             }
@@ -253,5 +276,4 @@ var AbstractGenerator = /** @class */ (function () {
     return AbstractGenerator;
 }());
 exports.AbstractGenerator = AbstractGenerator;
-exports.status = generatorStatus;
 //# sourceMappingURL=generators.js.map

@@ -1,7 +1,7 @@
 import {ShellCommand} from "./shell";
 
 
-export class AbstractProcessor {
+export abstract class AbstractProcessor {
     private debug: boolean;
     private compilationPanel: null;
     private result: null;

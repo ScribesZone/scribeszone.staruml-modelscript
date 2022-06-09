@@ -5,12 +5,15 @@ declare var type : any
 import * as fs from 'fs'
 import * as path from 'path'
 
+import * as staruml from './staruml'
+
 import { ensureDirectory } from "./misc"
 import { TraceErrorReporter } from './traces'
 import { asString } from "./models"
 import { ProcessorResult } from "./processors"
+import { AbstractGenerator } from "./generators"
 
-type StarUMLModel = typeof type.Model
+
 
 export type Category =
       "identifier1"
@@ -83,13 +86,13 @@ export class Token {
     public readonly line: Line
     public readonly text: string
     public readonly category: string
-    public readonly element: StarUMLModel | null
+    public readonly element: staruml.Model | null
 
     constructor(
         line : Line,
         text: string,
         category: Category = "default" as Category,
-        element : StarUMLModel | null,
+        element : staruml.Model | null = null,
         eventFns = undefined) {
 
         // @tscheck: redundant check with typescript
@@ -143,7 +146,7 @@ export class Token {
         this.category = category
 
         // check element
-        if (element !== undefined) {
+        if (element !== null) {
             if (! (element instanceof type.Model)) {
                 new TraceErrorReporter(
                     'asts',
@@ -156,7 +159,7 @@ export class Token {
         this.element = element
     }
 
-    getPlainText() {
+    getPlainText(): string {
         return this.text
     }
 }
@@ -175,11 +178,11 @@ export class Line {
         this.number = number
     }
 
-    addToken(token: Token) {
+    addToken(token: Token): void {
         this.tokens.push(token)
     }
 
-    getPlainText() {
+    getPlainText(): string {
         return this.tokens.map(t=>t.getPlainText()).join('')
     }
 }
@@ -191,7 +194,7 @@ export class AST {
     public readonly astCollection: ASTCollection
     public readonly filename: string
     public readonly role: string
-    public readonly elements: Array<StarUMLModel>
+    public readonly elements: Array<staruml.Model>
     public readonly lines: Line[]
     public isOpen: boolean
     public processorResult: any
@@ -202,7 +205,7 @@ export class AST {
     constructor( astCollection: ASTCollection,
                  filename: string,
                  role: string = "main",
-                 elements: Array<StarUMLModel> = [],
+                 elements: Array<staruml.Model> = [],
                  debug: boolean= false,
                  eventFns = null) {
         // @tscheck:
@@ -234,16 +237,21 @@ export class AST {
         return this.lines[this.lines.length-1]
     }
 
-    write(text, category, element) {
-        if (! isString(text)) {
-            const message = (
-                "First argument of write() must be a string. \n"
-                 + "Found: " + asString(text))
-            new TraceErrorReporter(
-                'asts',
-                message,
-                this.eventFns).throw()
-        }
+    write(
+        text: string,
+        category: Category = "default",
+        element: staruml.Model | null = null
+    ) {
+        // @tscheck
+        // if (! isString(text)) {
+        //     const message = (
+        //         "First argument of write() must be a string. \n"
+        //          + "Found: " + asString(text))
+        //     new TraceErrorReporter(
+        //         'asts',
+        //         message,
+        //         this.eventFns).throw()
+        // }
         if (text.split('\n').length >= 2) {
             const message = (
                 "First argument of write() is invalid. \n"
@@ -282,7 +290,11 @@ export class AST {
         }
     }
 
-    writeln(text, category, element) {
+    writeln(
+        text: string,
+        category: Category,
+        element: staruml.Model | null = null
+    ) {
         if (text !== undefined) {
             this.write(text, category, element)
         }
@@ -348,19 +360,25 @@ export class AST {
 }
 
 
+export interface ASTInfo {
+    role: string,
+    filename: string,
+    lines: number
+}
+
 export class ASTCollection {
     public readonly astSequence: Array<AST>
     public readonly astsByRole: Map<string, Array<AST>>
     public currentAST: AST | null
-    public readonly generator: any
+    public readonly generator: AbstractGenerator
 
     private readonly debug: boolean
     private readonly eventFns: any
 
 
-    constructor(generator,
+    constructor( generator : AbstractGenerator,
                  debug= false,
-                 eventFns = undefined) {
+                 eventFns = undefined ) {  // TODO: type eventFns
         this.generator = generator
         this.astsByRole = new Map()
         this.astSequence = []
@@ -369,7 +387,11 @@ export class ASTCollection {
         this.currentAST = null
     }
 
-    openAST(filename: string, role: string='main', elements: Array<StarUMLModel>) {
+    openAST(
+        filename: string,
+        role: string = 'main',
+        elements: Array<staruml.Model> = []
+    ): AST {
         //@tscheck: console.assert(typeof filename === 'string', filename)
         //@tscheck: console.assert(typeof role === 'string', role)
         console.assert(
@@ -382,21 +404,21 @@ export class ASTCollection {
             elements,
             this.debug,
             this.eventFns )
-        if (this.astsByRole[role] === undefined) {
-            this.astsByRole[role] = []
+        if (! this.astsByRole.has(role)) {
+            this.astsByRole.set(role, [])
         }
-        this.astsByRole[role].push(ast)
+        this.astsByRole.get(role)!.push(ast)
         this.astSequence.push(ast)
         this.currentAST = ast
         return ast
     }
 
-    reopenAST(ast) {
+    reopenAST(ast : AST): void {
         console.assert(ast instanceof AST, ast)
         this.currentAST = ast
     }
 
-    save() {
+    save(): void {
         if (this.currentAST === null) {
             const msg = 'ASTCollection.save() called but currentAST === null'
             console.error('ERROR: '+msg)
@@ -405,14 +427,14 @@ export class ASTCollection {
         this.currentAST.save()
     }
 
-    end() {
+    end(): void {
         console.assert(
             this.astSequence.every(ast => ! ast.isOpen),
             'end() can not be done. Some AST are still opened : ',
             this.astSequence.filter(ast => ast.isOpen))
     }
 
-    getStats() {
+    getStats(): Array<ASTInfo> {
         return this.astSequence.map( ast => ({
             role: ast.role,
             filename: ast.filename,
@@ -422,3 +444,4 @@ export class ASTCollection {
     }
 
 }
+
