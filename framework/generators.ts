@@ -5,7 +5,7 @@ import * as path from "path"
 
 import * as staruml from './staruml'
 
-import {AST, ASTCollection, Category} from "./asts"
+import { AST, ASTCollection, Category } from "./asts"
 import { asString } from "./models"
 import { TraceErrorReporter, TracedError } from './traces'
 
@@ -25,20 +25,18 @@ export enum GeneratorStatus {
  */
 
 
-// TODO: add generation status
-// TODO: add generation precondition handling
-
+// noinspection PointlessBooleanExpressionJS,UnreachableCodeJS
 /**
  * AbstractGenerator.
  * This class serves as a base class for developer written generators.
- * A generator create some ASTCollection (possibly with only one AST).
+ * A generator create a ASTCollection (possibly with only one AST).
  * Its contains convenience methods that make it simple to
  * open/write/save AST without knowing of AST and ASTCollections.
  * the details of the AS
  */
 export abstract class AbstractGenerator {
     public readonly astCollection: ASTCollection
-    public status: string
+    public status: GeneratorStatus
     public errorMessage: string |  null
     
     private readonly debug: boolean     
@@ -56,16 +54,24 @@ export abstract class AbstractGenerator {
     }
 
     /**
+     * Check a precondition for the doGenerate function to run.
+     * A particular generator could check for instance that
+     * given staruml elements of a proper type are selected.
+     * By default there is no precondition.
+     *
+     * Return true if the precondition is fulfilled otherwise
+     * return as a string an error message.
+     * @returns {string|boolean}
+     */
+    protected checkPrecondition() : string|boolean {
+         return true
+    }
+
+    /**
      * Generate the code. This method must be written by developer
      * generator.
      */
-    abstract generate(): void
-    // generate(): void {
-    //     console.assert(arguments.length === 0)
-    //     throw new Error('generate() is not implemented by generator')
-    // }
-
-
+    protected abstract generate(): void
 
     // TODO: move this function to misc module
 
@@ -93,7 +99,7 @@ export abstract class AbstractGenerator {
      *   f('.java','mod/a', 'person') = /h/zarwinn/mod/a/person.java
      */
 
-    getProjectBasedFilename(
+     getProjectBasedFilename(
             extension: string,
             relativeDirectory: string = '.',
             basename: string | null = null) {
@@ -110,6 +116,7 @@ export abstract class AbstractGenerator {
         const parts = path.parse(app.project.filename)
         const fileDirectory = path.join(parts.dir, relativeDirectory)
         const fileBasename = (basename ? basename : parts.name)
+        // noinspection UnnecessaryLocalVariableJS
         const filename = path.join(
             fileDirectory,
             fileBasename + extension)
@@ -122,7 +129,7 @@ export abstract class AbstractGenerator {
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
 
-    openAST(
+    protected openAST(
         filename: string,
         role: string = "main",
         elements: Array<staruml.Element> = []
@@ -140,7 +147,7 @@ export abstract class AbstractGenerator {
             elements)
     }
 
-    reopenAST(ast) {
+    protected reopenAST(ast) {
         this.astCollection.reopenAST(ast)
     }
 
@@ -154,7 +161,7 @@ export abstract class AbstractGenerator {
         }
     }
 
-    write(
+    protected write(
         text: string,
         category: Category = "default",
         element: staruml.Model | null = null
@@ -163,7 +170,7 @@ export abstract class AbstractGenerator {
         this.astCollection.currentAST!.write(text, category, element)
     }
 
-    writeln(
+    protected writeln(
         text: string,
         category: Category = "default",
         element: staruml.Model | null = null
@@ -172,7 +179,7 @@ export abstract class AbstractGenerator {
         this.astCollection.currentAST!.writeln(text, category, element)
     }
 
-    writeIdentifier(
+    protected writeIdentifier(
         text: string,
         element : staruml.Model | null = null
     ): void {
@@ -180,12 +187,12 @@ export abstract class AbstractGenerator {
         this.astCollection.currentAST!.write(text, 'identifier1', element)
     }
 
-    save(): void {
+    protected save(): void {
         this.checkCurrentAST()
         this.astCollection.currentAST!.save()
     }
 
-    end(): void {
+    protected end(): void {
         this.astCollection.end()
     }
 
@@ -199,49 +206,40 @@ export abstract class AbstractGenerator {
 
 
 
-    getPlainText(): string {
+    public getPlainText(): string {
         this.checkCurrentAST()
         return this.astCollection.currentAST!.getPlainText()
     }
 
-    getLineNumberedText(): string {
+    // getLineNumberedText(): string {
+    //     this.checkCurrentAST()
+    //     return this.astCollection.currentAST!.getLineNumberedText()
+    // }
+
+    // private getErrorMessage(): string | null {
+    //     return this.errorMessage
+    // }
+
+
+
+    private showError() {
         this.checkCurrentAST()
-        return this.astCollection.currentAST!.getLineNumberedText()
-    }
-
-    getErrorMessage(): string | null {
-        return this.errorMessage
-    }
-
-    /**
-     * Check a precondition for the doGenerate function to run.
-     * Return true if the precondition is full filled otherwise
-     * return as a string an error message.
-     * @returns {string|boolean}
-     */
-    checkPrecondition() {  // TODO: check type
-        if (false) {
-            return "TEST: FAKE PRECONDITION FAILURE MESSAGE" // TEST:
+        if (this.errorMessage) {
+            this.errorMessage.split('\n').reverse().forEach( line => {
+                app.toast.error(line, 120)
+            })
         }
-        return true
-    }
-
-    showError() {
-        this.checkCurrentAST()
-        this.errorMessage.split('\n').reverse().forEach( line => {
-                app.toast.error(line, 120);
-            }
-        )
         console.log('[GENERATOR]: Error: '+this.errorMessage)
     }
 
-    showSuccess() {
+    // noinspection JSMethodCanBeStatic
+    private showSuccess() {
         app.toast.info('file saved', 30)
     }
 
-    getStatus() {
-        return this.status
-    }
+    // private getStatus() {
+    //     return this.status
+    // }
 
     isGenerationSuccessful() {
         return this.status === GeneratorStatus.OK
@@ -251,7 +249,7 @@ export abstract class AbstractGenerator {
         this.postGenerateFun = fun
     }
 
-    doGenerate() {
+    public doGenerate() {
         if (! app.project.filename) {
             this.status = GeneratorStatus.UNNAMED_PROJECT
             this.errorMessage = "Project not saved. Generation cancelled."
@@ -261,7 +259,7 @@ export abstract class AbstractGenerator {
         const precondition = this.checkPrecondition()
         if ( precondition !== true) {
             this.status = GeneratorStatus.PRECONDITION_FAILED
-            this.errorMessage = precondition
+            this.errorMessage = precondition as string
             this.showError()
             return
         }
@@ -308,11 +306,11 @@ export abstract class AbstractGenerator {
 
     }
 
-    ruleCheck(callerArguments, signature) {
+    protected ruleCheck(callerArguments, signature) {
         // TODO
     }
 
-    ruleEnd() {
+    protected ruleEnd() {
         // TODO
     }
 
@@ -323,21 +321,24 @@ export abstract class AbstractGenerator {
      */
     __testGenerateModel() {
         // TEST:
-        if (false) {
-            this.write(null)
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write(null)
+        // }
         // TEST
-        if (false) {
-            this.write([])
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write([])
+        // }
         // TEST:
         if (false) {
             this.write('line1\nline2')
         }
         // TEST:
-        if (false) {
-            this.write('while','kixword')
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write('while','kixword')
+        // }
         // TEST:
         if (false) {
             this.write('person','identifier1','not an element')

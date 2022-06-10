@@ -17,12 +17,11 @@ var GeneratorStatus;
 *             Generators
 * =========================================================================
  */
-// TODO: add generation status
-// TODO: add generation precondition handling
+// noinspection PointlessBooleanExpressionJS,UnreachableCodeJS
 /**
  * AbstractGenerator.
  * This class serves as a base class for developer written generators.
- * A generator create some ASTCollection (possibly with only one AST).
+ * A generator create a ASTCollection (possibly with only one AST).
  * Its contains convenience methods that make it simple to
  * open/write/save AST without knowing of AST and ASTCollections.
  * the details of the AS
@@ -38,10 +37,19 @@ var AbstractGenerator = /** @class */ (function () {
         this.postGenerateFun = null;
         this.errorMessage = null;
     }
-    // generate(): void {
-    //     console.assert(arguments.length === 0)
-    //     throw new Error('generate() is not implemented by generator')
-    // }
+    /**
+     * Check a precondition for the doGenerate function to run.
+     * A particular generator could check for instance that
+     * given staruml elements of a proper type are selected.
+     * By default there is no precondition.
+     *
+     * Return true if the precondition is fulfilled otherwise
+     * return as a string an error message.
+     * @returns {string|boolean}
+     */
+    AbstractGenerator.prototype.checkPrecondition = function () {
+        return true;
+    };
     // TODO: move this function to misc module
     /**
      * Helper to compute easily output file base on
@@ -82,6 +90,7 @@ var AbstractGenerator = /** @class */ (function () {
         var parts = path.parse(app.project.filename);
         var fileDirectory = path.join(parts.dir, relativeDirectory);
         var fileBasename = (basename ? basename : parts.name);
+        // noinspection UnnecessaryLocalVariableJS
         var filename = path.join(fileDirectory, fileBasename + extension);
         return filename;
     };
@@ -142,38 +151,29 @@ var AbstractGenerator = /** @class */ (function () {
         this.checkCurrentAST();
         return this.astCollection.currentAST.getPlainText();
     };
-    AbstractGenerator.prototype.getLineNumberedText = function () {
-        this.checkCurrentAST();
-        return this.astCollection.currentAST.getLineNumberedText();
-    };
-    AbstractGenerator.prototype.getErrorMessage = function () {
-        return this.errorMessage;
-    };
-    /**
-     * Check a precondition for the doGenerate function to run.
-     * Return true if the precondition is full filled otherwise
-     * return as a string an error message.
-     * @returns {string|boolean}
-     */
-    AbstractGenerator.prototype.checkPrecondition = function () {
-        if (false) {
-            return "TEST: FAKE PRECONDITION FAILURE MESSAGE"; // TEST:
-        }
-        return true;
-    };
+    // getLineNumberedText(): string {
+    //     this.checkCurrentAST()
+    //     return this.astCollection.currentAST!.getLineNumberedText()
+    // }
+    // private getErrorMessage(): string | null {
+    //     return this.errorMessage
+    // }
     AbstractGenerator.prototype.showError = function () {
         this.checkCurrentAST();
-        this.errorMessage.split('\n').reverse().forEach(function (line) {
-            app.toast.error(line, 120);
-        });
+        if (this.errorMessage) {
+            this.errorMessage.split('\n').reverse().forEach(function (line) {
+                app.toast.error(line, 120);
+            });
+        }
         console.log('[GENERATOR]: Error: ' + this.errorMessage);
     };
+    // noinspection JSMethodCanBeStatic
     AbstractGenerator.prototype.showSuccess = function () {
         app.toast.info('file saved', 30);
     };
-    AbstractGenerator.prototype.getStatus = function () {
-        return this.status;
-    };
+    // private getStatus() {
+    //     return this.status
+    // }
     AbstractGenerator.prototype.isGenerationSuccessful = function () {
         return this.status === GeneratorStatus.OK;
     };
@@ -245,21 +245,24 @@ var AbstractGenerator = /** @class */ (function () {
      */
     AbstractGenerator.prototype.__testGenerateModel = function () {
         // TEST:
-        if (false) {
-            this.write(null);
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write(null)
+        // }
         // TEST
-        if (false) {
-            this.write([]);
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write([])
+        // }
         // TEST:
         if (false) {
             this.write('line1\nline2');
         }
         // TEST:
-        if (false) {
-            this.write('while', 'kixword');
-        }
+        // @tscheck
+        // if (false) {
+        //     this.write('while','kixword')
+        // }
         // TEST:
         if (false) {
             this.write('person', 'identifier1', 'not an element');
