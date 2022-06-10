@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.USEOCLGenerator = void 0;
 var generators_1 = require("./framework/generators");
 var models_1 = require("./framework/models");
 var CL1_EXTENSION = '.cl1';
@@ -309,7 +310,7 @@ var USEOCLGenerator = /** @class */ (function (_super) {
         this.writeln();
     };
     //---------------------------------------------------------------------
-    //   Objects & slots
+    //   Objects & slotsgenerators
     //---------------------------------------------------------------------
     USEOCLGenerator.prototype.stateObjects = function (stateModel) {
         console.assert(stateModel instanceof type.UMLPackage, stateModel);
@@ -525,4 +526,5 @@ var USEOCLGenerator = /** @class */ (function (_super) {
     };
     return USEOCLGenerator;
 }(generators_1.AbstractGenerator));
+exports.USEOCLGenerator = USEOCLGenerator;
 //# sourceMappingURL=generator.js.map

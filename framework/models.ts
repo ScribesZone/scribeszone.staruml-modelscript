@@ -87,11 +87,14 @@ export function asString(
  * @returns {Array<Element>} List pf Elements
  */
 
-export function selectAllElements(type_, stereotype=null) {
+export function selectAllElements(
+    type_,
+    stereotype: string|null = null) {
     console.assert(type_.name in type)
-    console.assert(
-        stereotype === null
-        || typeof stereotype === 'string')
+    // @ts-check
+    // console.assert(
+    //     stereotype === null
+    //     || typeof stereotype === 'string')
     let result = app.repository.select(
         '@'+type_.name)
     if (stereotype) {

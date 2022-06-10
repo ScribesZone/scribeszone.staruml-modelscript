@@ -91,8 +91,10 @@ exports.asString = asString;
 function selectAllElements(type_, stereotype) {
     if (stereotype === void 0) { stereotype = null; }
     console.assert(type_.name in type);
-    console.assert(stereotype === null
-        || typeof stereotype === 'string');
+    // @ts-check
+    // console.assert(
+    //     stereotype === null
+    //     || typeof stereotype === 'string')
     var result = app.repository.select('@' + type_.name);
     if (stereotype) {
         result = result.filter(function (e) {

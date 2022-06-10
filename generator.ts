@@ -39,7 +39,7 @@ const ATTRIBUTE_TYPE_CONVERSIONS = {
 
 
 // noinspection JSUnusedLocalSymbols
-class USEOCLGenerator extends AbstractGenerator {
+export class USEOCLGenerator extends AbstractGenerator {
     private readonly useModelScriptArtefactStructure: boolean;
     public classModelAST: AST | null
     public readonly stateModelASTs: Array<AST>
@@ -357,7 +357,7 @@ class USEOCLGenerator extends AbstractGenerator {
     }
 
     //---------------------------------------------------------------------
-    //   Objects & slots
+    //   Objects & slotsgenerators
     //---------------------------------------------------------------------
 
     stateObjects(stateModel): Array<any> {

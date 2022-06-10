@@ -39,8 +39,12 @@ export abstract class AbstractGenerator {
     public status: GeneratorStatus
     public errorMessage: string |  null
     
-    private readonly debug: boolean     
-    private eventFns: any // TODO: to be typed
+    private readonly debug: boolean
+
+    // TODO: move to private
+    //      currently the generator write in eventFns, this should be fixed
+    protected eventFns: any // TODO: to be typed
+
     private postGenerateFun: Function | null
 
     protected constructor(debug = true,
@@ -171,7 +175,7 @@ export abstract class AbstractGenerator {
     }
 
     protected writeln(
-        text: string,
+        text?: string,
         category: Category = "default",
         element: staruml.Model | null = null
     ): void {
