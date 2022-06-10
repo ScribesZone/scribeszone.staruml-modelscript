@@ -42,9 +42,10 @@ export const IDENTIFIER_CATEGORIES = [
 
 
 
-function isString(value): boolean {
-    return (typeof value === 'string' || value instanceof String)
-}
+// @tscheck
+// function isString(value): boolean {
+//     return (typeof value === 'string' || value instanceof String)
+// }
 
 /**
  * Pad a (line) number.
@@ -80,18 +81,24 @@ export function lineNumberPrefix(
 }
 
 /**
- * Token
+ * Token.
+ * @line
+ * @text THe content of the token. It must be not empty.
+ * It must not contain \n.
+ * @category
+ * @element
+ * Note:
  */
 export class Token {
     public readonly line: Line
     public readonly text: string
-    public readonly category: string
+    public readonly category: Category
     public readonly element: staruml.Model | null
 
     constructor(
         line : Line,
         text: string,
-        category: Category = "default" as Category,
+        category: Category = "default",
         element : staruml.Model | null = null,
         eventFns = undefined) {
 
@@ -164,8 +171,9 @@ export class Token {
     }
 }
 
+
 /**
- * Line, a sequence of token
+ * Lines, a sequence of tokens, part of an AST.
  */
 export class Line {
     public readonly tokens: Array<Token>
@@ -187,8 +195,10 @@ export class Line {
     }
 }
 
+
 /**
  * AST, Abstract Syntax Tree, represented as a sequence of lines.
+ * An AST is part of an AST collection.
  */
 export class AST {
     public readonly astCollection: ASTCollection

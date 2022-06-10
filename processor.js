@@ -68,7 +68,8 @@ function summarizeErrors(shellCommandResult) {
 }
 var AbstractCompilation = /** @class */ (function () {
     function AbstractCompilation(usePath, commandLabel) {
-        console.assert(typeof usePath === 'string');
+        // @tscheck
+        // console.assert(typeof usePath === 'string')
         this.usePath = usePath;
         this.shellProcessorResult = null;
         this.commandLabel = commandLabel;

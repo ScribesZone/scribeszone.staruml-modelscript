@@ -16,9 +16,10 @@ exports.IDENTIFIER_CATEGORIES = [
     "reference1",
     "reference2"
 ];
-function isString(value) {
-    return (typeof value === 'string' || value instanceof String);
-}
+// @tscheck
+// function isString(value): boolean {
+//     return (typeof value === 'string' || value instanceof String)
+// }
 /**
  * Pad a (line) number.
  * Example:
@@ -44,7 +45,13 @@ function lineNumberPrefix(num, maxLineNumbers, pad) {
 }
 exports.lineNumberPrefix = lineNumberPrefix;
 /**
- * Token
+ * Token.
+ * @line
+ * @text THe content of the token. It must be not empty.
+ * It must not contain \n.
+ * @category
+ * @element
+ * Note:
  */
 var Token = /** @class */ (function () {
     function Token(line, text, category, element, eventFns) {
@@ -109,7 +116,7 @@ var Token = /** @class */ (function () {
 }());
 exports.Token = Token;
 /**
- * Line, a sequence of token
+ * Lines, a sequence of tokens, part of an AST.
  */
 var Line = /** @class */ (function () {
     function Line(ast, number) {
@@ -128,6 +135,7 @@ var Line = /** @class */ (function () {
 exports.Line = Line;
 /**
  * AST, Abstract Syntax Tree, represented as a sequence of lines.
+ * An AST is part of an AST collection.
  */
 var AST = /** @class */ (function () {
     function AST(astCollection, filename, role, elements, debug, eventFns) {

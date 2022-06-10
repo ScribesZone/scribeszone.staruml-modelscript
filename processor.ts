@@ -25,7 +25,8 @@ export class AbstractCompilation{
     protected processorResult: ShellProcessorResult;
 
     constructor(usePath: string, commandLabel: string) {
-        console.assert(typeof usePath === 'string')
+        // @tscheck
+        // console.assert(typeof usePath === 'string')
         this.usePath = usePath
         this.shellProcessorResult = null
         this.commandLabel = commandLabel
