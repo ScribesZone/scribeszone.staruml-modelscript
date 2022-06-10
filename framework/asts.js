@@ -205,6 +205,7 @@ var AST = /** @class */ (function () {
         }
     };
     AST.prototype.writeln = function (text, category, element) {
+        if (category === void 0) { category = "default"; }
         if (element === void 0) { element = null; }
         if (text !== undefined) {
             this.write(text, category, element);
@@ -264,7 +265,7 @@ var ASTCollection = /** @class */ (function () {
         if (eventFns === void 0) { eventFns = undefined; }
         this.generator = generator;
         this.astsByRole = new Map();
-        this.astSequence = [];
+        this.asts = [];
         this.debug = debug;
         this.eventFns = eventFns;
         this.currentAST = null;
@@ -280,7 +281,7 @@ var ASTCollection = /** @class */ (function () {
             this.astsByRole.set(role, []);
         }
         this.astsByRole.get(role).push(ast);
-        this.astSequence.push(ast);
+        this.asts.push(ast);
         this.currentAST = ast;
         return ast;
     };
@@ -297,10 +298,10 @@ var ASTCollection = /** @class */ (function () {
         this.currentAST.save();
     };
     ASTCollection.prototype.end = function () {
-        console.assert(this.astSequence.every(function (ast) { return !ast.isOpen; }), 'end() can not be done. Some AST are still opened : ', this.astSequence.filter(function (ast) { return ast.isOpen; }));
+        console.assert(this.asts.every(function (ast) { return !ast.isOpen; }), 'end() can not be done. Some AST are still opened : ', this.asts.filter(function (ast) { return ast.isOpen; }));
     };
     ASTCollection.prototype.getStats = function () {
-        return this.astSequence.map(function (ast) { return ({
+        return this.asts.map(function (ast) { return ({
             role: ast.role,
             filename: ast.filename,
             lines: ast.lines.length,

@@ -205,9 +205,9 @@ export class AST {
     public readonly filename: string
     public readonly role: string
     public readonly elements: Array<staruml.Model>
-    public readonly lines: Line[]
+    public readonly lines: Array<Line>
     public isOpen: boolean
-    public processorResult: any
+    public processorResult: ProcessorResult | null
 
     private readonly debug: boolean
     private readonly eventFns: any
@@ -301,8 +301,8 @@ export class AST {
     }
 
     writeln(
-        text: string,
-        category: Category,
+        text?: string,
+        category: Category = "default",
         element: staruml.Model | null = null
     ) {
         if (text !== undefined) {
@@ -370,14 +370,14 @@ export class AST {
 }
 
 
-export interface ASTInfo {
+interface ASTInfo {
     role: string,
     filename: string,
     lines: number
 }
 
 export class ASTCollection {
-    public readonly astSequence: Array<AST>
+    public readonly asts: Array<AST> // ordered
     public readonly astsByRole: Map<string, Array<AST>>
     public currentAST: AST | null
     public readonly generator: AbstractGenerator
@@ -391,7 +391,7 @@ export class ASTCollection {
                  eventFns = undefined ) {  // TODO: type eventFns
         this.generator = generator
         this.astsByRole = new Map()
-        this.astSequence = []
+        this.asts = []
         this.debug = debug
         this.eventFns = eventFns
         this.currentAST = null
@@ -418,7 +418,7 @@ export class ASTCollection {
             this.astsByRole.set(role, [])
         }
         this.astsByRole.get(role)!.push(ast)
-        this.astSequence.push(ast)
+        this.asts.push(ast)
         this.currentAST = ast
         return ast
     }
@@ -439,13 +439,13 @@ export class ASTCollection {
 
     end(): void {
         console.assert(
-            this.astSequence.every(ast => ! ast.isOpen),
+            this.asts.every(ast => ! ast.isOpen),
             'end() can not be done. Some AST are still opened : ',
-            this.astSequence.filter(ast => ast.isOpen))
+            this.asts.filter(ast => ast.isOpen))
     }
 
     getStats(): Array<ASTInfo> {
-        return this.astSequence.map( ast => ({
+        return this.asts.map(ast => ({
             role: ast.role,
             filename: ast.filename,
             lines: ast.lines.length,
