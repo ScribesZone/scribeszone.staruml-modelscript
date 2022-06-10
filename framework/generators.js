@@ -135,6 +135,12 @@ var AbstractGenerator = /** @class */ (function () {
         this.checkCurrentAST();
         this.astCollection.currentAST.write(text, 'identifier1', element);
     };
+    AbstractGenerator.prototype.ruleCheck = function (callerArguments, signature) {
+        // TODO
+    };
+    AbstractGenerator.prototype.ruleEnd = function () {
+        // TODO
+    };
     AbstractGenerator.prototype.save = function () {
         this.checkCurrentAST();
         this.astCollection.currentAST.save();
@@ -147,10 +153,10 @@ var AbstractGenerator = /** @class */ (function () {
     // Provided from developer convenience. These methods calls
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
-    AbstractGenerator.prototype.getPlainText = function () {
-        this.checkCurrentAST();
-        return this.astCollection.currentAST.getPlainText();
-    };
+    // public getPlainText(): string {
+    //     this.checkCurrentAST()
+    //     return this.astCollection.currentAST!.getPlainText()
+    // }
     // getLineNumberedText(): string {
     //     this.checkCurrentAST()
     //     return this.astCollection.currentAST!.getLineNumberedText()
@@ -232,12 +238,6 @@ var AbstractGenerator = /** @class */ (function () {
             var that = this;
             this.postGenerateFun(that);
         }
-    };
-    AbstractGenerator.prototype.ruleCheck = function (callerArguments, signature) {
-        // TODO
-    };
-    AbstractGenerator.prototype.ruleEnd = function () {
-        // TODO
     };
     /*
     This test function should be called from  somewhere in generator.js to

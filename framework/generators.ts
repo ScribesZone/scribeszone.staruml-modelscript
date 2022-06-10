@@ -187,6 +187,15 @@ export abstract class AbstractGenerator {
         this.astCollection.currentAST!.write(text, 'identifier1', element)
     }
 
+    protected ruleCheck(callerArguments, signature) {
+        // TODO
+    }
+
+    protected ruleEnd() {
+        // TODO
+    }
+
+
     protected save(): void {
         this.checkCurrentAST()
         this.astCollection.currentAST!.save()
@@ -206,10 +215,10 @@ export abstract class AbstractGenerator {
 
 
 
-    public getPlainText(): string {
-        this.checkCurrentAST()
-        return this.astCollection.currentAST!.getPlainText()
-    }
+    // public getPlainText(): string {
+    //     this.checkCurrentAST()
+    //     return this.astCollection.currentAST!.getPlainText()
+    // }
 
     // getLineNumberedText(): string {
     //     this.checkCurrentAST()
@@ -306,13 +315,6 @@ export abstract class AbstractGenerator {
 
     }
 
-    protected ruleCheck(callerArguments, signature) {
-        // TODO
-    }
-
-    protected ruleEnd() {
-        // TODO
-    }
 
 
     /*
