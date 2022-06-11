@@ -1,35 +1,47 @@
 /**
- * This module aims to create transformation developer bettor errors,
- * with a better accuracy. Since developers modify only the generators.js
- * file the idea is to search in the stack trace where was the last
- * location in this file.
+ * This module aims at creating errors by searching the last function
+ * in the call stack in a given module. This makes it easier to detect
+ * error and improving their accuracy. CURRENTLY THE FILE IS NOT GIVEN
+ * AS A PARAMETER, THIS MODULE IS CURRENTLY USED FOR
+ *  transformation developers modify are changing only the
+ * "generators.js" file the idea is to search in the stack trace where was
+ * the last location in this file.
  */
 
-// TODO: make it a parameter
-const fs = require("fs");
-let FILE_TRACED = "generator.js"
+import * as fs from "fs"
 
-// TODO: generalize and make stack extraction more robust
-
-function numberOrNull(value) {
+function numberOrNull(value: string) {
     const x = parseInt(value)
-    return (x === NaN ? null : x)
+    return (isNaN(x) ? null : x)
 }
 
+interface RawLocation {
+    class_: string
+    function_: string
+    fileBasename: string
+    filePath: string
+    lineNumber : string
+    columnNumber : string
+}
 
+// noinspection UnnecessaryLocalVariableJS
+/**
+ * A traced location in source code with more details.
+ */
 export class TracedLocation {
-    private options: any;
-    private class_: any;
-    private function_: any;
-    private filePath: any;
-    private fileBasename: any;
-    private lineNumber: number;
-    private columnNumber: number;
-    private codeLine: string;
+    public readonly class_: string
+    public readonly function_: string
+    public readonly filePath: string
+    public readonly fileBasename: string
+    public readonly lineNumber: number | null
+    public readonly columnNumber: number | null
+    public readonly codeLine: string | null
 
-    constructor(options) {
+    private readonly options: any
+
+    constructor(options: RawLocation | null) {
         this.options = options
-        if (options) {
+        if (options !== null) {
             this.class_ = options['class_']
             this.function_ = options['function_']
             this.filePath = options['filePath']
@@ -40,11 +52,11 @@ export class TracedLocation {
         }
     }
 
-    isDefined() {
+    isDefined(): boolean {
         return (this.options)
     }
 
-    _getCodeLine() {
+    private _getCodeLine(): string | null {
         if (this.filePath && this.lineNumber) {
             try {
                 const file_content = fs.readFileSync(this.filePath, 'utf8')
@@ -59,7 +71,7 @@ export class TracedLocation {
         }
     }
 
-    getLineSpec() {
+    getLineSpec(): string {
         if (this.isDefined()) {
             return (
                 this.fileBasename
@@ -81,7 +93,7 @@ export class TracedLocation {
         }
     }
 
-    getPositionDescription(header) {
+    getPositionDescription(header): string {
         if (this.isDefined()) {
             const code_line = this.codeLine
             return (
@@ -102,88 +114,123 @@ export class TracedLocation {
  * The implementation is quite ugly but this is the only way (?) to get
  * this information since .caller attribute has been removed in strict mode.
  * Based on https://stackoverflow.com/questions/29572466/how-do-you-find-out-the-caller-function-in-javascript-when-use-strict-is-enabled
+ *
+ * Example
+ * -------
+ *
+ * see https://regex101.com/r/2AViNI/1
+ *
+ * Here is an example of file trace produced.
+ *
+ * File trace here provided as an example.
+ * Note that class_, function_ might not be there. Same thing for other components.
+ * The trace below has been made with copy paste.
+ *
+ *     at firstTraceLocation (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/traces.js:52:27)
+ *     at new TraceErrorReporter (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/traces.js:111:25)
+ *     at Writer.write (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/writer.js:147:13)
+ *     at USEOCLGenerator.write (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/generator.js:54)
+ *     at USEOCLGenerator.__testGenerateModel (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/generators.js:185:18)
+ *     at USEOCLGenerator.generateModel (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/generator.js:119:56)
+ *     at USEOCLGenerator.generate (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/generator.js:132)
+ *     at USEOCLGenerator.doGenerate (/D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/framework/generators.js:138:18)
+ *     at /D2/ScribesZone/StarUMLZone/scribeszone.staruml-useocl/main.js:95:27
+ *     at CommandManager.execute (/opt/StarUML/resources/app.asar/src/engine/command-manager.js:104:22)
  */
-function firstTraceLocation(errorObject = undefined) {
-    console.log('DG:91', FILE_TRACED)
-    if (FILE_TRACED) {
-        let stack_trace
-        if (errorObject) {
-            stack_trace = errorObject.stack
-        } else {
-            stack_trace = new Error().stack
-        }
-        // TODO: generalize stack extraction. here FILE_TRACED inside
-        // see https://regex101.com/r/2AViNI/1
-        const re_prefix = ' *at '
-        const re_fun = '((?<class_>\\w+)\\.)?(?<function_>\\w+)'
-        const re_file = ' \\((?<filePrefix>.*)(?<fileBasename>' + FILE_TRACED + ')'
-        const re_line_number = ':(?<lineNumber>\\d+)'
-        const re_column_number = '(:(?<columnNumber>\\d+))?'
-        const re_full = (
-            re_prefix
-            + re_fun
-            + re_file
-            + re_line_number
-            + re_column_number)
-        const re = new RegExp(re_full)
-        let match = re.exec(stack_trace)
-        if (match) {
-            const groups = match.groups
+
+function firstTraceLocation(
+    javascriptFileTraced: string,
+    errorObject: Error | null = null
+)
+{
+    let stack_trace
+    if (errorObject instanceof Error) {
+        stack_trace = errorObject.stack
+    } else {
+        stack_trace = new Error().stack
+    }
+    // see https://regex101.com/r/2AViNI/1
+    const re_prefix = ' *at '
+    const re_fun = '((?<class_>\\w+)\\.)?(?<function_>\\w+)'
+    const re_file = ' \\((?<filePrefix>.*)(?<fileBasename>' + javascriptFileTraced + ')'
+    const re_line_number = ':(?<lineNumber>\\d+)'
+    const re_column_number = '(:(?<columnNumber>\\d+))?'
+    const re_full = (
+        re_prefix
+        + re_fun
+        + re_file
+        + re_line_number
+        + re_column_number)
+    const re = new RegExp(re_full)
+    let match = re.exec(stack_trace)
+    if (match) {
+        const groups = match.groups
+        if (groups) {
             return new TracedLocation(
                 {
-                    class_ : groups["class_"],
-                    function_ : groups["function_"],
-                    fileBasename : groups["fileBasename"],
-                    filePath : (
-                        groups["filePrefix"]+groups["fileBasename"]
+                    class_: groups["class_"],
+                    function_: groups["function_"],
+                    fileBasename: groups["fileBasename"],
+                    filePath: (
+                        groups["filePrefix"] + groups["fileBasename"]
                     ),
-                    lineNumber : groups["lineNumber"],
-                    columnNumber : groups["columnNumber"]
+                    lineNumber: groups["lineNumber"],
+                    columnNumber: groups["columnNumber"]
                 })
         } else {
-             return new TracedLocation(undefined)
+            return new TracedLocation(null)
         }
     } else {
-        return new TracedLocation(undefined)
+         return new TracedLocation(null)
     }
 }
 
-export class TracedError extends Error {
-    component: any;
-    private location: any;
+/**
+ * Exception raised by TraceErrorReporter
+ */
+class TracedError extends Error {
+    public component: string
+    private location: TracedLocation
 
-    constructor(message, component, location) {
+    constructor(message: string, component: string, location: TracedLocation) {
         super(message)
         this.component = component
         this.location = location
     }
-
 }
 
 
+
+/**
+ * Utility to report an error where the error is located to the
+ * last position in trace.
+ * No event is emitted.
+ */
 export class TraceErrorReporter {
-    private component: any;
-    private message: string;
-    private exception: Error;
-    private location: TracedLocation;
-    private eventFns: any;
+    public readonly component: string
+    public readonly message: string
+    public readonly exception: Error | null
+    public readonly location: TracedLocation
+    public readonly javascriptFileToTrace: string
 
     /**
-     * Report an error
+     * Report an error.
+     * @param {string} javascriptFileToTrace the name of the javascript file
+     * to trace. That is the error is reported in the corresponding location
+     * in the stack trace.
      * @param {string} component The name of the component reporting the error.
+     * There is no definition for the concept of "component". Just a string.
      * @param {string|Error} messageOrException Message for a new
      * error to create or an exception (javascript Error).
-     * @param {map(...onError)}  eventFns Handlers. Event onError is emitted.
+     *
+     * NOTE: the error is not thrown by this constructor. Use throw() to
+     * throw the actual error.
      */
     constructor(
+            javascriptFileToTrace: string,
             component: string,
-            messageOrException: string | Error,
-            eventFns = undefined) {
-        console.assert(typeof component === 'string')
-        console.assert(
-            typeof messageOrException === 'string'
-            || messageOrException instanceof Error
-        )
+            messageOrException: string | Error) {
+        this.javascriptFileToTrace = javascriptFileToTrace
         this.component = component
         if (messageOrException instanceof Error) {
             this.message = messageOrException.message
@@ -192,15 +239,13 @@ export class TraceErrorReporter {
             this.message = messageOrException
             this.exception = null
         }
-        this.eventFns = eventFns
-        this.location = firstTraceLocation(this.exception)
-        console.assert(this.location instanceof TracedLocation)
-        if (eventFns && eventFns["onError"]) {
-            eventFns["onError"](this)
-        }
+        this.location = firstTraceLocation(
+            javascriptFileToTrace,
+            this.exception)
     }
 
-    throw() {
+
+    throw(): never {
         if (this.exception) {
             throw this.exception
         } else {
@@ -211,8 +256,7 @@ export class TraceErrorReporter {
         }
     }
 
-
-    fullMessage() {
+    fullMessage():string {
         return (
             'Error reported by the "'+this.component+'" component:\n'
             + this.message
@@ -220,8 +264,3 @@ export class TraceErrorReporter {
                 'Last user location:')))
     }
 }
-
-
-// exports.TraceErrorReporter = TraceErrorReporter
-// exports.TracedError = TracedError
-// exports.TracedLocation = TracedLocation
