@@ -113,7 +113,7 @@ export class USEOCLGenerator extends AbstractGenerator {
     //  Enumerations
     //--------------------------------------------------------------------
 
-    generateEnumerations(enumerations: type.Enumeration): void {
+    generateEnumerations(enumerations): void {
         // this.ruleCheck(arguments, [type.UMLEnumeration])
         enumerations.forEach( enumeration => {
             this.generateEnumeration(enumeration)
@@ -358,7 +358,7 @@ export class USEOCLGenerator extends AbstractGenerator {
     }
 
     //---------------------------------------------------------------------
-    //   Objects & slotsgenerators
+    //   Objects & slots generators
     //---------------------------------------------------------------------
 
     stateObjects(stateModel): Array<any> {

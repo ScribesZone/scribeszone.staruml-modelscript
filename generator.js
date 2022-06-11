@@ -310,7 +310,7 @@ var USEOCLGenerator = /** @class */ (function (_super) {
         this.writeln();
     };
     //---------------------------------------------------------------------
-    //   Objects & slotsgenerators
+    //   Objects & slots generators
     //---------------------------------------------------------------------
     USEOCLGenerator.prototype.stateObjects = function (stateModel) {
         console.assert(stateModel instanceof type.UMLPackage, stateModel);
