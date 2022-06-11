@@ -1,9 +1,9 @@
+
 import {
     AbstractProcessor,
     ProcessorResult,
     ShellProcessorResult
 } from "./framework/processors"
-
 import { ShellCommand } from "./framework/shell"
 import { AST } from "./framework/asts"
 

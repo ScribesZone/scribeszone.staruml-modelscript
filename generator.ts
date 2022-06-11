@@ -80,7 +80,8 @@ export class USEOCLGenerator extends AbstractGenerator {
             use_filename = this.getProjectBasedFilename(
                 CL1_EXTENSION,
                 '.',
-                CL1_FILENAME)        }
+                CL1_FILENAME)
+        }
         if (this.eventFns && this.eventFns['onFileGeneration']) {
             this.eventFns['onFileGeneration'](
                 'class model',
@@ -112,7 +113,7 @@ export class USEOCLGenerator extends AbstractGenerator {
     //  Enumerations
     //--------------------------------------------------------------------
 
-    generateEnumerations(enumerations): void {
+    generateEnumerations(enumerations: type.Enumeration): void {
         // this.ruleCheck(arguments, [type.UMLEnumeration])
         enumerations.forEach( enumeration => {
             this.generateEnumeration(enumeration)

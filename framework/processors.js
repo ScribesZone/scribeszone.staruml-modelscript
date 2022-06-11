@@ -24,14 +24,8 @@ var AbstractProcessor = /** @class */ (function () {
         this.result = null;
         this.postProcessResult = null;
     }
-    AbstractProcessor.prototype.isProcessorEnabled = function () {
-        throw new Error('isProcessorEnabled() is not implemented by processor');
-    };
     AbstractProcessor.prototype.setCompilationPanel = function (compilationPanel) {
         this.compilationPanel = compilationPanel;
-    };
-    AbstractProcessor.prototype.doProcess = function () {
-        throw new Error('doProcess() must be implemented');
     };
     return AbstractProcessor;
 }());

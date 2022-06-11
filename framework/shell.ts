@@ -1,33 +1,44 @@
-const {exec} = require("child_process");
+import { exec } from "child_process"
 
-
+/**
+ * ShellCommandResult. The result of a ShellCommand with the optional
+ * error, stderr, and stdout.
+ */
 export class ShellCommandResult {
     private readonly shellCommand: ShellCommand
-    private readonly error: Error | null
-    private readonly stderr: string;
-    private readonly stdout: string;
+    public readonly error: Error | null
+    public readonly stderr: string
+    public readonly stdout: string
 
     constructor(shellCommand: ShellCommand,
                 error: Error | null,
                 stdout: string,
                 stderr: string ) {
-        console.assert(shellCommand instanceof ShellCommand)
-        console.assert( error === null || error instanceof Error)
-        console.assert(typeof stdout === 'string')
-        console.assert(typeof stderr === 'string')
+        // @ts-check
+        // console.assert(shellCommand instanceof ShellCommand)
+        // console.assert( error === null || error instanceof Error)
+        // console.assert(typeof stdout === 'string')
+        // console.assert(typeof stderr === 'string')
         this.shellCommand = shellCommand
         this.error = error
         this.stderr = stderr
         this.stdout = stdout
     }
 
-    hasErrors() {
+    /**
+     * Indicates if the command terminated with an error, either detected
+     * with an Error object or via some output on stderr.
+     */
+    hasErrors(): boolean {
         return (
             (this.error !== null)
             || (this.stderr !== ''))
     }
 
-    getText() {
+    /**
+     * Convert the result to a text.
+     */
+    getText(): string {
         let result = ''
         if (this.error && (this.error.message !== 'Command failed: '+this.stderr)) {
            result += 'Error code is '+this.error.message+'\n'
@@ -47,24 +58,29 @@ export class ShellCommandResult {
         // SEE "How to use Promise with exec in Node.js"
         // https://ali-dev.medium.com/how-to-use-promise-with-exec-in-node-js-a39c4d7bbf77
 
+/**
+ * A ShellCommand that can be executed and that leads to a ShellCommandResult
+ */
 
 export class ShellCommand {
-    private readonly command: string;
-    private readonly label: string
+    public readonly command: string;
+    public readonly label: string
+    public result: ShellCommandResult | null
     private readonly postExecutionFun: any;
     private readonly debug: boolean;
-    result: ShellCommandResult | null;
     private postExecutionResult: any | ShellCommandResult | null;
 
     constructor(command: string,
-                postExecutionFun = null ,
+                postExecutionFun: Function | null = null ,
                 label: string = '',  // mostly to simplify console messages
                 debug = false) {
-        console.assert(typeof command === 'string')
-        console.assert(
-            postExecutionFun === null
-            || typeof postExecutionFun === 'function')
-        console.assert(typeof label === 'string')
+        // @ts-check
+        // console.assert(typeof command === 'string')
+        // console.assert(
+        //     postExecutionFun === null
+        //     || typeof postExecutionFun === 'function')
+        // @ts-check
+        // console.assert(typeof label === 'string')
         this.command = command
         this.label = label
         this.postExecutionFun = postExecutionFun
@@ -78,7 +94,7 @@ export class ShellCommand {
      * Executes a shell command and returns it as a promise
      * @returns {Promise<true>}
      */
-    execute() {
+    execute(): Promise<ShellCommand> {
         return new Promise(resolve => {
             if (this.debug) {
                 console.log(

@@ -1,38 +1,33 @@
-import {ShellCommand} from "./shell";
+import { ShellCommand } from "./shell";
 
 
 export abstract class AbstractProcessor {
     private debug: boolean;
-    private compilationPanel: null;
+    private compilationPanel: any;
     private result: null;
-    private postProcessResult: null;
+    public postProcessResult: null;
 
-    constructor(debug = true) {
+    protected constructor(debug = true) {
         this.debug = debug
         this.compilationPanel = null
         this.result = null
         this.postProcessResult = null
     }
 
-    isProcessorEnabled() {
-        throw new Error(
-            'isProcessorEnabled() is not implemented by processor')
-    }
+    abstract isProcessorEnabled()
 
-    setCompilationPanel(compilationPanel) {
+    setCompilationPanel(compilationPanel): void {
         this.compilationPanel = compilationPanel
     }
 
-    doProcess() {
-        throw new Error('doProcess() must be implemented')
-    }
+    abstract doProcess()
 }
 
 export class ProcessorResult {
 
 }
 
-export class ShellProcessorResult extends ProcessorResult{
+export class ShellProcessorResult extends ProcessorResult {
     shellCommand: ShellCommand
     constructor(shellCommand: ShellCommand) {
         super()
