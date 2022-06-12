@@ -21,6 +21,7 @@ const ENABLE_PROCESSOR = true
 
 import { CustomPanel }      from "./framework/panels"
 import { CodeInterface }    from "./framework/renderer"
+import { AST }              from "./framework/asts"
 
 import { Beautifier }       from "./beautifier"
 import { CheckerRegistry }  from "./checker"
@@ -164,12 +165,12 @@ class ConsoleInterface {
                         }
                     }
                 )
-                const use_modelscript_artefact_structure = (
+                const use_modelscript_artefact_layout = (
                     app.preferences.get(
-                            'useocl.generation.structure')
+                            'useocl.generation.layout')
                 )
                 const generator = new USEOCLGenerator(
-                    use_modelscript_artefact_structure,
+                    use_modelscript_artefact_layout,
                     debug_generator,
                     {
                         // TODO: encapsulate references to panel
@@ -203,8 +204,11 @@ class ConsoleInterface {
                             //         + 'See DevTools console for more information (Alt-Shift-T)'
                             // )
                         },
-                        onFileGeneration : (message, filename) => {
-                            this.hardwiredConsoleOutput.newFileSectionHeader(message, filename)
+                        // onFileGeneration : (message, filename) => {
+                        //     this.hardwiredConsoleOutput.newFileSectionHeader(message, filename)
+                        // },
+                        onOpen: (ast: AST) => {
+                            this.hardwiredConsoleOutput.newFileSectionHeader(ast.label, ast.filename)
                         },
                         onSaveFile : (nb_of_lines) => {
                             this.hardwiredConsoleOutput.append(
@@ -243,7 +247,8 @@ class ConsoleInterface {
                         // TODO: make a multi-AST interface
                         // Currently only the last AST is displayed
                         // CodeInterface should take the astCollection instead
-                        codeInterface.build(generator.astCollection.currentAST)
+                        console.assert(generator.astCollection.currentAST != null)
+                        codeInterface.build(generator.astCollection.currentAST!)
                     }
 
                     if (ENABLE_PROCESSOR) {
@@ -275,7 +280,7 @@ class ConsoleInterface {
                         }
                     }
                 } else {
-                    this.consolePanel.setHTML(generator.getErrorMessage())
+                    this.consolePanel.setHTML(generator.errorMessage)
                 }
 
 

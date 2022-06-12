@@ -51,7 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.USEOCLProcessor = exports.AbstractCompilation = void 0;
+exports.USEOCLProcessor = void 0;
 var processors_1 = require("./framework/processors");
 var shell_1 = require("./framework/shell");
 var asts_1 = require("./framework/asts");
@@ -66,18 +66,13 @@ function summarizeErrors(shellCommandResult) {
         return 'compilation successful';
     }
 }
-var AbstractCompilation = /** @class */ (function () {
-    function AbstractCompilation(usePath, commandLabel) {
-        // @tscheck
-        // console.assert(typeof usePath === 'string')
-        this.usePath = usePath;
+var AbstractUSEOCLCompilation = /** @class */ (function () {
+    function AbstractUSEOCLCompilation(useoclPath, compilationLabel) {
+        this.useoclPath = useoclPath;
         this.shellProcessorResult = null;
-        this.commandLabel = commandLabel;
+        this.compilationLabel = compilationLabel;
     }
-    AbstractCompilation.prototype.getCommand = function () {
-        throw new Error('getCommand() must be implemented');
-    };
-    AbstractCompilation.prototype.__getErroneousCommand = function () {
+    AbstractUSEOCLCompilation.prototype.__getErroneousCommand = function () {
         if (false) { // TEST: just output
             return 'ls -l';
         }
@@ -85,20 +80,17 @@ var AbstractCompilation = /** @class */ (function () {
             return 'ls -WRONG ; ls -l';
         }
     };
-    AbstractCompilation.prototype.bindProcessorResult = function () {
-        throw new Error('bindProcessorResult() must be implemented');
-    };
     /**
      *
      * // @returns {Promise<ShellProcessorResult>}
      */
-    AbstractCompilation.prototype.doCompile = function () {
+    AbstractUSEOCLCompilation.prototype.doCompile = function () {
         return __awaiter(this, void 0, void 0, function () {
             var shell_command;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        shell_command = new shell_1.ShellCommand(this.getCommand(), summarizeErrors, this.commandLabel, true);
+                        shell_command = new shell_1.ShellCommand(this.getCommand(), summarizeErrors, this.compilationLabel, true);
                         return [4 /*yield*/, shell_command.execute()];
                     case 1:
                         _a.sent();
@@ -109,9 +101,8 @@ var AbstractCompilation = /** @class */ (function () {
             });
         });
     };
-    return AbstractCompilation;
+    return AbstractUSEOCLCompilation;
 }());
-exports.AbstractCompilation = AbstractCompilation;
 var ClassModelCompilation = /** @class */ (function (_super) {
     __extends(ClassModelCompilation, _super);
     function ClassModelCompilation(classModelAST, usePath) {
@@ -122,10 +113,10 @@ var ClassModelCompilation = /** @class */ (function (_super) {
         return _this;
     }
     ClassModelCompilation.prototype.getTraceFilename = function () {
-        return this.classModelAST.filename + '.utc';
+        return this.classModelAST.filename + '.out';
     };
     ClassModelCompilation.prototype.getCommand = function () {
-        return (this.usePath // TODO: deal with incorrect use installation
+        return (this.useoclPath // TODO: deal with incorrect use installation
             + ' -c '
             + this.classModelAST.filename
             + ' > '
@@ -136,16 +127,14 @@ var ClassModelCompilation = /** @class */ (function (_super) {
         this.classModelAST.processorResult = this.processorResult;
     };
     return ClassModelCompilation;
-}(AbstractCompilation));
+}(AbstractUSEOCLCompilation));
 var StateModelCompilation = /** @class */ (function (_super) {
     __extends(StateModelCompilation, _super);
     function StateModelCompilation(classModelAST, stateModelAST, usePath) {
         var _this = this;
         var state_name = stateModelAST.elements[0].name;
         _this = _super.call(this, usePath, state_name + ' state compilation') || this;
-        console.assert(classModelAST instanceof asts_1.AST, classModelAST);
         console.assert(classModelAST.role === "class");
-        console.assert(stateModelAST instanceof asts_1.AST, stateModelAST);
         console.assert(stateModelAST.role === "state");
         _this.classModelAST = classModelAST;
         _this.stateModelAST = stateModelAST;
@@ -155,7 +144,7 @@ var StateModelCompilation = /** @class */ (function (_super) {
         return this.stateModelAST.filename + '.stc';
     };
     StateModelCompilation.prototype.getCommand = function () {
-        return (this.usePath
+        return (this.useoclPath
             + ' -qv '
             + this.classModelAST.filename // TODO: check filename
             + ' '
@@ -168,17 +157,18 @@ var StateModelCompilation = /** @class */ (function (_super) {
         this.stateModelAST.processorResult = this.processorResult;
     };
     return StateModelCompilation;
-}(AbstractCompilation));
+}(AbstractUSEOCLCompilation));
 var USEOCLProcessor = /** @class */ (function (_super) {
     __extends(USEOCLProcessor, _super);
     function USEOCLProcessor(generator, debug) {
         if (debug === void 0) { debug = true; }
         var _this = _super.call(this, debug) || this;
         _this.generator = generator;
-        // this.processorEnabled = useocl.compilation.use.path
         _this.processorEnabled = app.preferences.get('useocl.compilation.compile');
+        // TODO: check value
         _this.usePath = app.preferences.get("useocl.compilation.use.path");
         return _this;
+        // TODO: check value
     }
     USEOCLProcessor.prototype.isProcessorEnabled = function () {
         return this.processorEnabled;
@@ -256,6 +246,5 @@ var USEOCLProcessor = /** @class */ (function (_super) {
     };
     return USEOCLProcessor;
 }(processors_1.AbstractProcessor));
-exports.USEOCLProcessor = USEOCLProcessor;
 exports.USEOCLProcessor = USEOCLProcessor;
 //# sourceMappingURL=processor.js.map

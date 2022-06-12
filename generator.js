@@ -33,16 +33,64 @@ var ATTRIBUTE_TYPE_CONVERSIONS = {
     "Date": "String",
     "Time": "String"
 };
+/**
+ * Layout choice defined in preferences/preference.json
+ */
+var USEOCLLayoutKind;
+(function (USEOCLLayoutKind) {
+    USEOCLLayoutKind[USEOCLLayoutKind["build"] = 0] = "build";
+    USEOCLLayoutKind[USEOCLLayoutKind["inplace"] = 1] = "inplace";
+    USEOCLLayoutKind[USEOCLLayoutKind["modelscript"] = 2] = "modelscript";
+})(USEOCLLayoutKind || (USEOCLLayoutKind = {}));
+var USEOCLGeneratorLayout = /** @class */ (function () {
+    function USEOCLGeneratorLayout(layoutKind) {
+        if (layoutKind === void 0) { layoutKind = USEOCLLayoutKind.build; }
+        this.buildDir = "build";
+        this.layoutKind = layoutKind !== null && layoutKind !== void 0 ? layoutKind : app.preferences.get('useocl.generation.layout');
+    }
+    USEOCLGeneratorLayout.prototype.getUseFileName = function () {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return (0, generators_1.getProjectBasedFilename)(CL1_EXTENSION, this.buildDir, CL1_FILENAME);
+            case USEOCLLayoutKind.modelscript:
+                return (0, generators_1.getProjectBasedFilename)(CL1_EXTENSION, MODELSCRIPT_CL1_DIRECTORY, CL1_FILENAME);
+            case USEOCLLayoutKind.inplace:
+                return (0, generators_1.getProjectBasedFilename)(CL1_EXTENSION, '.', CL1_FILENAME);
+        }
+    };
+    USEOCLGeneratorLayout.prototype.getSoilFilename = function (stateModel) {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return (0, generators_1.getProjectBasedFilename)(OB1_EXTENSION, this.buildDir, stateModel.name); // TODO: check model name
+            case USEOCLLayoutKind.modelscript:
+                return (0, generators_1.getProjectBasedFilename)(OB1_EXTENSION, path.join(MODELSCRIPT_OB1_PARENT_DIRECTORY, stateModel.name), stateModel.name); // TODO: check model name
+            case USEOCLLayoutKind.inplace:
+                return (0, generators_1.getProjectBasedFilename)(OB1_EXTENSION, '.', stateModel.name); // TODO: check model name
+        }
+    };
+    USEOCLGeneratorLayout.prototype.getUseCaseFilename = function () {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return (0, generators_1.getProjectBasedFilename)(USS_EXTENSION, this.buildDir, USS_FILENAME);
+            case USEOCLLayoutKind.modelscript:
+                return (0, generators_1.getProjectBasedFilename)(OB1_EXTENSION, MODELSCRIPT_USS_DIRECTORY, USS_FILENAME);
+            case USEOCLLayoutKind.inplace:
+                return (0, generators_1.getProjectBasedFilename)(USS_EXTENSION, '.', USS_FILENAME);
+        }
+    };
+    return USEOCLGeneratorLayout;
+}());
 // noinspection JSUnusedLocalSymbols
 var USEOCLGenerator = /** @class */ (function (_super) {
     __extends(USEOCLGenerator, _super);
-    function USEOCLGenerator(useModelScriptArtefactStructure, debug, eventFns) {
+    function USEOCLGenerator(layoutKind, debug, eventFns) {
+        if (layoutKind === void 0) { layoutKind = USEOCLLayoutKind.build; }
         if (debug === void 0) { debug = true; }
-        if (eventFns === void 0) { eventFns = undefined; }
         var _this = _super.call(this, debug, eventFns) || this;
-        _this.useModelScriptArtefactStructure = useModelScriptArtefactStructure;
+        _this.layout = new USEOCLGeneratorLayout(layoutKind);
         _this.classModelAST = null;
         _this.stateModelASTs = [];
+        _this.usecaseModelAST = null;
         _this.soilStatementIndex = 0; // use to in getSoilStatementIndex
         return _this;
     }
@@ -56,18 +104,11 @@ var USEOCLGenerator = /** @class */ (function (_super) {
     //====================================================================
     USEOCLGenerator.prototype.generateClassModel = function () {
         // this.ruleCheck(arguments, "none")
-        var use_filename;
-        if (this.useModelScriptArtefactStructure) {
-            use_filename = this.getProjectBasedFilename(CL1_EXTENSION, MODELSCRIPT_CL1_DIRECTORY, CL1_FILENAME);
-        }
-        else {
-            // create a ".use" file at the top level
-            use_filename = this.getProjectBasedFilename(CL1_EXTENSION, '.', CL1_FILENAME);
-        }
+        var use_filename = this.layout.getUseFileName();
         if (this.eventFns && this.eventFns['onFileGeneration']) {
             this.eventFns['onFileGeneration']('class model', use_filename);
         }
-        this.classModelAST = this.openAST(use_filename, 'class');
+        this.classModelAST = this.openAST(use_filename, 'class model', 'class');
         this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!");
         this.writeln();
         this.write('model ', 'keyword');
@@ -133,7 +174,7 @@ var USEOCLGenerator = /** @class */ (function (_super) {
     };
     USEOCLGenerator.prototype.generateClass = function (class_) {
         // this.ruleCheck(arguments, type.UMLClass)
-        if (class_.isAbstract) {
+        if (class_.isAbstractTIT) {
             this.write('abstract ', 'keyword');
         }
         var association_side = (0, models_1.isClassAssociationClassSide)(class_);
@@ -277,18 +318,11 @@ var USEOCLGenerator = /** @class */ (function (_super) {
         return (0, models_1.selectAllElements)(type.UMLPackage, 'state');
     };
     USEOCLGenerator.prototype.generateStateModel = function (stateModel) {
-        var soil_filename;
-        if (this.useModelScriptArtefactStructure) {
-            soil_filename = this.getProjectBasedFilename(OB1_EXTENSION, path.join(MODELSCRIPT_OB1_PARENT_DIRECTORY, stateModel.name), stateModel.name); // TODO: check model name
-            console.log(soil_filename);
-        }
-        else {
-            soil_filename = this.getProjectBasedFilename(OB1_EXTENSION, '.', stateModel.name); // TODO: check model name
-        }
+        var soil_filename = this.layout.getSoilFilename(stateModel);
         if (this.eventFns && this.eventFns['onFileGeneration']) {
             this.eventFns['onFileGeneration'](stateModel.name + ' state model', soil_filename);
         }
-        var ast = this.openAST(soil_filename, 'state', [stateModel]);
+        var ast = this.openAST(soil_filename, stateModel.name + ' state model', 'state', [stateModel]);
         this.stateModelASTs.push(ast);
         this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!");
         this.writeln();
@@ -451,19 +485,8 @@ var USEOCLGenerator = /** @class */ (function (_super) {
     //  UseCase model
     //====================================================================
     USEOCLGenerator.prototype.generateUseCaseModel = function () {
-        // this.ruleCheck(arguments, "none")
-        var use_case_model_filename;
-        if (this.useModelScriptArtefactStructure) {
-            use_case_model_filename = this.getProjectBasedFilename(USS_EXTENSION, MODELSCRIPT_USS_DIRECTORY, USS_FILENAME);
-        }
-        else {
-            // create a ".uss" file at the top level
-            use_case_model_filename = this.getProjectBasedFilename(USS_EXTENSION, '.', USS_FILENAME);
-        }
-        if (this.eventFns && this.eventFns['onFileGeneration']) {
-            this.eventFns['onFileGeneration']('use case model', USS_EXTENSION, '.', USS_FILENAME);
-        }
-        this.classModelAST = this.openAST(use_case_model_filename, 'usecase');
+        var use_case_model_filename = this.layout.getUseCaseFilename();
+        this.usecaseModelAST = this.openAST(use_case_model_filename, 'use case model', 'usecase');
         this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!");
         this.writeln();
         this.write('model ', 'keyword');

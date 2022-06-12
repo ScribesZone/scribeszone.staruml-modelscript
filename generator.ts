@@ -1,9 +1,13 @@
-declare var app : any
-declare var type : any
+import * as staruml from "./framework/staruml"
+declare var app: staruml.IAppContext
+declare var type: any
 
-
-import { AST } from "./framework/asts"
-import { AbstractGenerator } from "./framework/generators"
+import { Token, Line, AST, ASTTracedErrorReporter } from "./framework/asts"
+import {
+    AbstractGenerator,
+    GeneratorFuns,
+    getProjectBasedFilename }
+from "./framework/generators"
 
 import {
     selectOwnedElements,
@@ -35,25 +39,105 @@ const ATTRIBUTE_TYPE_CONVERSIONS = {
     "Time" : "String"
 }
 
+/**
+ * Layout choice defined in preferences/preference.json
+ */
+enum USEOCLLayoutKind {
+    build = 0,        // see constants in preference.json
+    inplace = 1,
+    modelscript = 2
+}
 
+class USEOCLGeneratorLayout {
+
+    private readonly layoutKind : USEOCLLayoutKind
+    private readonly buildDir = "build"
+
+    constructor(layoutKind: USEOCLLayoutKind = USEOCLLayoutKind.build) {
+        this.layoutKind = layoutKind ?? app.preferences.get('useocl.generation.layout')
+    }
+
+    getUseFileName(): string {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return getProjectBasedFilename(
+                    CL1_EXTENSION,
+                    this.buildDir,
+                    CL1_FILENAME)
+            case USEOCLLayoutKind.modelscript:
+                return getProjectBasedFilename(
+                    CL1_EXTENSION,
+                    MODELSCRIPT_CL1_DIRECTORY,
+                    CL1_FILENAME)
+            case USEOCLLayoutKind.inplace:
+                return getProjectBasedFilename(
+                    CL1_EXTENSION,
+                    '.',
+                    CL1_FILENAME)
+        }
+    }
+
+    getSoilFilename(stateModel) {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return getProjectBasedFilename(
+                    OB1_EXTENSION,
+                    this.buildDir,
+                    stateModel.name) // TODO: check model name
+            case USEOCLLayoutKind.modelscript:
+                return getProjectBasedFilename(
+                    OB1_EXTENSION,
+                    path.join(MODELSCRIPT_OB1_PARENT_DIRECTORY, stateModel.name),
+                    stateModel.name) // TODO: check model name
+            case USEOCLLayoutKind.inplace:
+                return getProjectBasedFilename(
+                    OB1_EXTENSION,
+                    '.',
+                    stateModel.name) // TODO: check model name
+        }
+    }
+
+    getUseCaseFilename(): string {
+        switch (this.layoutKind) {
+            case USEOCLLayoutKind.build:
+                return getProjectBasedFilename(
+                    USS_EXTENSION,
+                    this.buildDir,
+                    USS_FILENAME)
+            case USEOCLLayoutKind.modelscript:
+                return getProjectBasedFilename(
+                    OB1_EXTENSION,
+                    MODELSCRIPT_USS_DIRECTORY,
+                    USS_FILENAME)
+            case USEOCLLayoutKind.inplace:
+                return getProjectBasedFilename(
+                    USS_EXTENSION,
+                    '.',
+                    USS_FILENAME)
+        }
+    }
+
+}
 
 
 // noinspection JSUnusedLocalSymbols
 export class USEOCLGenerator extends AbstractGenerator {
-    private readonly useModelScriptArtefactStructure: boolean;
+    private readonly layout: USEOCLGeneratorLayout
     public classModelAST: AST | null
     public readonly stateModelASTs: Array<AST>
+    public usecaseModelAST: AST | null
     private soilStatementIndex: number
 
     constructor(
-        useModelScriptArtefactStructure: boolean,
+        layoutKind: USEOCLLayoutKind = USEOCLLayoutKind.build,
         debug = true,
-        eventFns= undefined
+        eventFns: GeneratorFuns
     ) {
         super(debug, eventFns)
-        this.useModelScriptArtefactStructure = useModelScriptArtefactStructure
+        this.layout = new USEOCLGeneratorLayout(layoutKind)
         this.classModelAST = null
         this.stateModelASTs = []
+        this.usecaseModelAST = null
         this.soilStatementIndex = 0 // use to in getSoilStatementIndex
     }
 
@@ -69,25 +153,16 @@ export class USEOCLGenerator extends AbstractGenerator {
 
     generateClassModel(): void {
         // this.ruleCheck(arguments, "none")
-        let use_filename
-        if (this.useModelScriptArtefactStructure) {
-            use_filename = this.getProjectBasedFilename(
-                CL1_EXTENSION,
-                MODELSCRIPT_CL1_DIRECTORY,
-                CL1_FILENAME)
-        } else {
-            // create a ".use" file at the top level
-            use_filename = this.getProjectBasedFilename(
-                CL1_EXTENSION,
-                '.',
-                CL1_FILENAME)
-        }
+        const use_filename = this.layout.getUseFileName()
         if (this.eventFns && this.eventFns['onFileGeneration']) {
             this.eventFns['onFileGeneration'](
                 'class model',
                 use_filename)
         }
-        this.classModelAST = this.openAST(use_filename, 'class')
+        this.classModelAST = this.openAST(
+            use_filename,
+            'class model',
+            'class')
         this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!")
         this.writeln()
         this.write('model ', 'keyword')
@@ -164,7 +239,7 @@ export class USEOCLGenerator extends AbstractGenerator {
 
     generateClass(class_): void {
         // this.ruleCheck(arguments, type.UMLClass)
-        if (class_.isAbstract) {
+        if (class_.isAbstractTIT) {
             this.write('abstract ', 'keyword')
         }
         const association_side = isClassAssociationClassSide(class_)
@@ -199,7 +274,6 @@ export class USEOCLGenerator extends AbstractGenerator {
                     this.write(', ')
                 }
             })
-
         }
         this.ruleEnd()
     }
@@ -313,19 +387,7 @@ export class USEOCLGenerator extends AbstractGenerator {
     }
 
     generateStateModel(stateModel): void {
-        let soil_filename
-        if (this.useModelScriptArtefactStructure) {
-            soil_filename = this.getProjectBasedFilename(
-                OB1_EXTENSION,
-                path.join(MODELSCRIPT_OB1_PARENT_DIRECTORY, stateModel.name),
-                stateModel.name) // TODO: check model name
-            console.log(soil_filename)
-        } else {
-            soil_filename = this.getProjectBasedFilename(
-                OB1_EXTENSION,
-                '.',
-                stateModel.name) // TODO: check model name
-        }
+        const soil_filename = this.layout.getSoilFilename(stateModel)
         if (this.eventFns && this.eventFns['onFileGeneration']) {
             this.eventFns['onFileGeneration'](
                 stateModel.name + ' state model',
@@ -333,6 +395,7 @@ export class USEOCLGenerator extends AbstractGenerator {
         }
         const ast = this.openAST(
             soil_filename,
+            stateModel.name + ' state model',
             'state',
             [stateModel])
         this.stateModelASTs.push(ast)
@@ -527,28 +590,13 @@ export class USEOCLGenerator extends AbstractGenerator {
     //====================================================================
 
     generateUseCaseModel(): void {
-        // this.ruleCheck(arguments, "none")
-        let use_case_model_filename
-        if (this.useModelScriptArtefactStructure) {
-            use_case_model_filename = this.getProjectBasedFilename(
-                USS_EXTENSION,
-                MODELSCRIPT_USS_DIRECTORY,
-                USS_FILENAME)
-        } else {
-            // create a ".uss" file at the top level
-            use_case_model_filename = this.getProjectBasedFilename(
-                USS_EXTENSION,
-                '.',
-                USS_FILENAME)
-        }
-        if (this.eventFns && this.eventFns['onFileGeneration']) {
-            this.eventFns['onFileGeneration'](
-                'use case model',
-                USS_EXTENSION,
-                '.',
-                USS_FILENAME)
-        }
-        this.classModelAST = this.openAST(use_case_model_filename, 'usecase')
+
+
+        let use_case_model_filename = this.layout.getUseCaseFilename()
+        this.usecaseModelAST = this.openAST(
+            use_case_model_filename,
+            'use case model',
+            'usecase')
         this.writeln("-- THIS FILE IS GENERATED. DON'T TOUCH IT!!!")
         this.writeln()
         this.write('model ', 'keyword')

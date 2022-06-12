@@ -1,5 +1,10 @@
 // noinspection UnnecessaryLocalVariableJS
 
+/**
+ * The file that is known by the generator developer.
+ */
+const JAVASCRIPT_FILE_TO_TRACE = 'generator.js'
+
 declare var type : any
 
 import * as fs from 'fs'
@@ -8,11 +13,9 @@ import * as path from 'path'
 import * as staruml from './staruml'
 
 import { ensureDirectory } from "./misc"
-import { TraceErrorReporter } from './traces'
+import { TracedErrorReporter } from './traces'
 import { asString } from "./models"
-import { ProcessorResult } from "./processors"
 import { AbstractGenerator } from "./generators"
-
 
 
 export type Category =
@@ -40,54 +43,51 @@ export const IDENTIFIER_CATEGORIES = [
 ] as Array<Category> ;
 
 
+/**
+ * Report an error during the generation process. The error will be
+ * located in the "generator.js" file so that the user can understand
+ * which line of code is faulty.
+ */
+export class ASTTracedErrorReporter extends TracedErrorReporter {
+    public readonly ast: AST
 
-
-// @tscheck
-// function isString(value): boolean {
-//     return (typeof value === 'string' || value instanceof String)
-// }
+    constructor(
+        ast: AST,
+        component: string,
+        messageOrException: string | Error)
+    {
+        super(
+            JAVASCRIPT_FILE_TO_TRACE,
+            component,
+            messageOrException)
+        this.ast = ast
+        this.ast.emitOnError(this) // TODO: create typescript
+    }
+}
 
 /**
  * Pad a (line) number.
  * Example:
  *      lineNumberPrefix(45, 348) = " 45"
- * 45 is the source line number, 348 the total number of line.
- * @param num
- * @param maxLineNumbers
- * @param pad
+ * 45 is the source line number, 348 the total number of line. The
+ * total number is used to compute the amount of padding characters.
  */
 export function lineNumberPrefix(
     num: number,
     maxLineNumbers: number,
     pad: string = ' '
 ): String {
-    if (num === undefined) {
-        new TraceErrorReporter(
-            'asts',
-            "'num' of lineNumberPrefix() is undefined.",
-            undefined).throw()
-    }
-    if (maxLineNumbers === undefined) {
-        new TraceErrorReporter(
-            'asts',
-            "ERROR : 'maxLineNumbers' of lineNumberPrefix() is undefined.",
-            undefined).throw()
-    }
     const max_digits = maxLineNumbers.toString().length
-    const space_prefix = " ".repeat(max_digits)
+    const space_prefix = pad.repeat(max_digits)
     const with_spaces = space_prefix + num
     const prefix = with_spaces.substring(with_spaces.length-max_digits)
     return prefix
 }
 
 /**
- * Token.
- * @line
- * @text THe content of the token. It must be not empty.
- * It must not contain \n.
- * @category
- * @element
- * Note:
+ * Tokens, that is a piece of text, a category and an optional element
+ * that typically have produced the token. The token could be the name
+ * of a class and then the element would be the class.
  */
 export class Token {
     public readonly line: Line
@@ -99,68 +99,39 @@ export class Token {
         line : Line,
         text: string,
         category: Category = "default",
-        element : staruml.Model | null = null,
-        eventFns = undefined) {
+        element : staruml.Model | null = null) {
 
-        // @tscheck: redundant check with typescript
-        // if(! (line instanceof Line)) {
-        //     new TraceErrorReporter(
-        //         'asts',
-        //         "First argument of Token must be a line \n"
-        //          + "Found: " + asString(line),
-        //         eventFns).throw()
-        // }
         this.line = line
-
-        // @tscheck: redundant check with typescript
-        // check text
-        // if (! isString(text)) {
-        //     new TraceErrorReporter(
-        //         'asts',
-        //         "Token text must be a string. \n"
-        //          + "Found: " + asString(text),
-        //         eventFns).throw()
-        // }
         if (text.split('\n').length >= 2) {
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this.line.ast,
                 'asts',
                 "Token text must not be multiline. \n"
                 + "Found: "
-                + asString(text.split('\n')[0] + "\\n ...'"),
-                eventFns).throw()
+                + asString(text.split('\n')[0] + "\\n ...'")
+            ).throw()
         }
         if (text.length === 0) {
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this.line.ast,
                 'asts',
                 "Token text must not be empty. \n"
-                + "Found: ''",
-                eventFns).throw()
+                + "Found: ''"
+            ).throw()
         }
         this.text = text
-
-        // check category
-        // const cat = (category === undefined ? "default" : category)
-        // if (! CATEGORIES.includes(category)) {
-        //     const category_list = '['+CATEGORIES.join(', ')+']'
-        //     new TraceErrorReporter(
-        //         'asts',
-        //         'Invalid token category.\n'
-        //         + 'Found :"' + asString(category) + '"\n'
-        //         + 'Available categories are '+category_list+'.\n'
-        //         + 'Token text was: ' + text,
-        //         eventFns).throw()
-        // }
         this.category = category
 
         // check element
         if (element !== null) {
             if (! (element instanceof type.Model)) {
-                new TraceErrorReporter(
+                new ASTTracedErrorReporter(
+                    this.line.ast,
                     'asts',
     'Token element must be a type.Model element.\n'
                     + 'Type found: '+(typeof element)+'\n'
-                    + 'Value found: ' + asString(element),
-                    eventFns).throw()
+                    + 'Value found: ' + asString(element)
+                ).throw()
             }
         }
         this.element = element
@@ -169,6 +140,7 @@ export class Token {
     getPlainText(): string {
         return this.text
     }
+
 }
 
 
@@ -180,7 +152,7 @@ export class Line {
     public readonly ast: AST
     public readonly number: number
 
-    constructor(ast: AST, number: number) {
+    constructor(ast: AST, number: number) { // TODO: compute the number parameter
         this.ast = ast
         this.tokens = []
         this.number = number
@@ -191,56 +163,109 @@ export class Line {
     }
 
     getPlainText(): string {
-        return this.tokens.map(t=>t.getPlainText()).join('')
+        return this.tokens.map(t =>
+            t.getPlainText())
+            .join('')
     }
 }
+
+export interface ASTFuns {
+    onError?: (reporter: any) => void,
+    onOpen?: (ast) => void,
+    afterToken?: (token: Token) => void,
+    afterLine?: (line: Line) => void,
+    onSaveFile?: (nbOfLines: number) => void
+}
+
+//
+//
+//     emitAfterToken(token: Token) {
+//         if (this.eventFns && this.eventFns["afterToken"]) {
+//             this.eventFns["afterToken"](token)
+//         }
+//     }
+//
+//     emitAfterLine(line: Line) {
+//         if (this.eventFns && this.eventFns["afterLine"]) {
+//             this.eventFns["afterLine"](line)
+//         }
+//     }
+//
+//     emitOnSaveFile(lineSaved: number) {
+//         if (this.eventFns && this.eventFns['onSaveFile']) {
+//             this.eventFns['onSaveFile'](lineSaved)
+//         }
+//     }
+//
+//     emitOnError(error: ASTTracedErrorReporter) {
+//         if (this.eventFns && this.eventFns['onError']) {
+//             this.eventFns['onError'](error)
+//         }
+//     }
 
 
 /**
  * AST, Abstract Syntax Tree, represented as a sequence of lines.
  * An AST is part of an AST collection.
  */
-export class AST {
+
+export class AST {  // TODO: add EventEmitter
     public readonly astCollection: ASTCollection
     public readonly filename: string
+    public readonly label: string  // something like class model or lea state model
     public readonly role: string
     public readonly elements: Array<staruml.Model>
     public readonly lines: Array<Line>
     public isOpen: boolean
-    public processorResult: ProcessorResult | null
 
     private readonly debug: boolean
-    private readonly eventFns: any
+    private readonly eventFns: ASTFuns
 
     constructor( astCollection: ASTCollection,
                  filename: string,
+                 label: string = "",
                  role: string = "main",
                  elements: Array<staruml.Model> = [],
                  debug: boolean= false,
-                 eventFns = null) {
-        // @tscheck:
-        // console.assert(
-        //     astCollection instanceof ASTCollection, astCollection)
-        // console.assert(
-        //     typeof filename === 'string' && filename, filename)
-        // console.assert(typeof role === 'string', role)
+                 eventFns = {}) {  // TODO: replace eventFns by
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
         this.astCollection = astCollection
         this.filename = filename
+        this.label = label
         this.role = role
         this.elements = elements
         this.lines = [new Line(this,1)]
         this.debug = debug
-        this.eventFns = eventFns
+        this.eventFns = eventFns  // TODO: replace eventFns by
+        this.isOpen = false
+    }
+
+    /**
+     * Open the AST so that it can be used with write statements.
+     * Having this step is necessary to have time to register events
+     */
+    open() {
+        if (this.isOpen) {
+            new ASTTracedErrorReporter(
+                this,
+                'asts',
+                "AST is opened"
+            ).throw()
+        } else {}
         this.isOpen = true
-        /**
-         * Processor result optionally set and used by processor.
-         * This field is not used otherwise unless mentioned.
-         * @type {null|ProcessorResult}
-         */
-        this.processorResult = null
+        this.emitOnOpen()
+    }
+
+    private _checkIsOpen() {
+        if (! this.isOpen) {
+            new ASTTracedErrorReporter(
+                this,
+                'asts',
+                "AST is closed"
+            ).throw()
+        }
     }
 
     currentLine() {
@@ -252,16 +277,7 @@ export class AST {
         category: Category = "default",
         element: staruml.Model | null = null
     ) {
-        // @tscheck
-        // if (! isString(text)) {
-        //     const message = (
-        //         "First argument of write() must be a string. \n"
-        //          + "Found: " + asString(text))
-        //     new TraceErrorReporter(
-        //         'asts',
-        //         message,
-        //         this.eventFns).throw()
-        // }
+        this._checkIsOpen()
         if (text.split('\n').length >= 2) {
             const message = (
                 "First argument of write() is invalid. \n"
@@ -270,18 +286,20 @@ export class AST {
                 + "Use writeln() instead.\n"
                 + "Found: " + asString(
                     text.split('\n')[0] + '\\n'+'...'))
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this,
                 'asts',
-                message,
-                this.eventFns).throw()
+                message
+            ).throw()
         }
         if (! this.isOpen) {
             const message = (
                 "AST has been closed by save(). No more token can be added")
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this,
                 'asts',
                 message,
-                this.eventFns).throw()
+            ).throw()
         }
         if (text !== '') {
             const token = new Token(
@@ -289,11 +307,10 @@ export class AST {
                 text,
                 category,
                 element,
-                this.eventFns)
+            )
             this.currentLine().addToken(token)
-            if (this.eventFns && this.eventFns["afterToken"]) {
-                this.eventFns["afterToken"](token)
-            }
+            this.emitAfterToken(token)
+
             if (this.debug) {
                 console.log('[ASTS]:     ',text)
             }
@@ -307,12 +324,12 @@ export class AST {
     ) {
         if (text !== undefined) {
             this.write(text, category, element)
+        } else {
+            this._checkIsOpen()
         }
         const new_line = new Line(this,this.lines.length+1)
         this.lines.push(new_line)
-        if (this.eventFns && this.eventFns["afterLine"]) {
-            this.eventFns["afterLine"](new_line)
-        }
+        this.emitAfterLine(new_line)
     }
 
     getPlainText(withLineNumber= false) {
@@ -331,10 +348,11 @@ export class AST {
         if (! this.isOpen) {
             const message = (
                 "AST is not open. It cannot be saved.")
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this,
                 'asts',
                 message,
-                this.eventFns).throw()
+            ).throw()
         }
         if (this.debug) {
             console.log('[ASTS]: **** saving output to "' + this.filename)
@@ -347,25 +365,55 @@ export class AST {
                 "Fail to create parent directory "
                 + parent_directory
                 + " for file " + this.filename)
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this,
                 'asts',
-                message,
-                this.eventFns).throw()
+                message
+            ).throw()
         }
         try {
             fs.writeFileSync(this.filename, this.getPlainText())
         } catch (error) {
             const message = (
                 "Fail to save AST file: " + this.filename)
-            new TraceErrorReporter(
+            new ASTTracedErrorReporter(
+                this,
                 'asts',
-                message,
-                this.eventFns).throw()
+                message
+            ).throw()
         }
-        if (this.eventFns && this.eventFns['onSaveFile']) {
-            this.eventFns['onSaveFile'](this.lines.length)
-        }
+        this.emitOnSaveFile(this.lines.length)
         this.isOpen = false
+    }
+
+    emitOnOpen() {
+        if (this.eventFns && this.eventFns["onOpen"]) {
+            this.eventFns["onOpen"](this)
+        }
+    }
+
+    emitAfterToken(token: Token) {
+        if (this.eventFns && this.eventFns["afterToken"]) {
+            this.eventFns["afterToken"](token)
+        }
+    }
+
+    emitAfterLine(line: Line) {
+        if (this.eventFns && this.eventFns["afterLine"]) {
+            this.eventFns["afterLine"](line)
+        }
+    }
+
+    emitOnSaveFile(lineSaved: number) {
+        if (this.eventFns && this.eventFns['onSaveFile']) {
+            this.eventFns['onSaveFile'](lineSaved)
+        }
+    }
+
+    emitOnError(error: ASTTracedErrorReporter) {
+        if (this.eventFns && this.eventFns['onError']) {
+            this.eventFns['onError'](error)
+        }
     }
 }
 
@@ -383,12 +431,12 @@ export class ASTCollection {
     public readonly generator: AbstractGenerator
 
     private readonly debug: boolean
-    private readonly eventFns: any
+    private readonly eventFns: ASTFuns
 
 
     constructor( generator : AbstractGenerator,
                  debug= false,
-                 eventFns = undefined ) {  // TODO: type eventFns
+                 eventFns: ASTFuns = {} ) {  // TODO: type eventFns
         this.generator = generator
         this.astsByRole = new Map()
         this.asts = []
@@ -399,21 +447,22 @@ export class ASTCollection {
 
     openAST(
         filename: string,
+        label: string = '',
         role: string = 'main',
         elements: Array<staruml.Model> = []
     ): AST {
-        //@tscheck: console.assert(typeof filename === 'string', filename)
-        //@tscheck: console.assert(typeof role === 'string', role)
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
         const ast = new AST(
             this,
             filename,
+            label,
             role,
             elements,
             this.debug,
             this.eventFns )
+        ast.open()
         if (! this.astsByRole.has(role)) {
             this.astsByRole.set(role, [])
         }
@@ -424,7 +473,6 @@ export class ASTCollection {
     }
 
     reopenAST(ast : AST): void {
-        console.assert(ast instanceof AST, ast)
         this.currentAST = ast
     }
 

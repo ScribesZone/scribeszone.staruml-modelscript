@@ -116,8 +116,8 @@ var ConsoleInterface = /** @class */ (function () {
                     //         +`</div>`)
                 }
             });
-            var use_modelscript_artefact_structure = (app.preferences.get('useocl.generation.structure'));
-            var generator = new generator_1.USEOCLGenerator(use_modelscript_artefact_structure, debug_generator, {
+            var use_modelscript_artefact_layout = (app.preferences.get('useocl.generation.layout'));
+            var generator = new generator_1.USEOCLGenerator(use_modelscript_artefact_layout, debug_generator, {
                 // TODO: encapsulate references to panel
                 // #panel-useocl-zone should be a parameter
                 afterToken: function (token) {
@@ -146,8 +146,11 @@ var ConsoleInterface = /** @class */ (function () {
                     //         + 'See DevTools console for more information (Alt-Shift-T)'
                     // )
                 },
-                onFileGeneration: function (message, filename) {
-                    _this.hardwiredConsoleOutput.newFileSectionHeader(message, filename);
+                // onFileGeneration : (message, filename) => {
+                //     this.hardwiredConsoleOutput.newFileSectionHeader(message, filename)
+                // },
+                onOpen: function (ast) {
+                    _this.hardwiredConsoleOutput.newFileSectionHeader(ast.label, ast.filename);
                 },
                 onSaveFile: function (nb_of_lines) {
                     _this.hardwiredConsoleOutput.append("<div>".concat(nb_of_lines, " lines generated.</div>"));
@@ -175,6 +178,7 @@ var ConsoleInterface = /** @class */ (function () {
                     // TODO: make a multi-AST interface
                     // Currently only the last AST is displayed
                     // CodeInterface should take the astCollection instead
+                    console.assert(generator.astCollection.currentAST != null);
                     codeInterface.build(generator.astCollection.currentAST);
                 }
                 if (ENABLE_PROCESSOR) {
@@ -207,7 +211,7 @@ var ConsoleInterface = /** @class */ (function () {
                 }
             }
             else {
-                _this.consolePanel.setHTML(generator.getErrorMessage());
+                _this.consolePanel.setHTML(generator.errorMessage);
             }
         }, undefined);
         app.commands.register(this.toggleCommand, function () {

@@ -1,13 +1,19 @@
+declare var app: any
 
 import {
     AbstractProcessor,
-    ProcessorResult,
     ShellProcessorResult
 } from "./framework/processors"
-import { ShellCommand } from "./framework/shell"
-import { AST } from "./framework/asts"
+import {
+    ShellCommand,
+    ShellCommandResult
+} from "./framework/shell"
+import {AST} from "./framework/asts"
 
-function summarizeErrors(shellCommandResult) {
+import * as StarUML from "./framework/staruml"
+import {USEOCLGenerator} from "./generator";
+
+function summarizeErrors(shellCommandResult: ShellCommandResult) {
     if (shellCommandResult.hasErrors()) {
         const nb_errors = shellCommandResult.stderr.split('/n').length
                  console.log('DG53 ', nb_errors)
@@ -18,23 +24,30 @@ function summarizeErrors(shellCommandResult) {
     }
 }
 
-export class AbstractCompilation{
-    public usePath: string;
-    private shellProcessorResult: null;
-    private commandLabel: string;
-    protected processorResult: ShellProcessorResult;
 
-    constructor(usePath: string, commandLabel: string) {
-        // @tscheck
-        // console.assert(typeof usePath === 'string')
-        this.usePath = usePath
+abstract class AbstractUSEOCLCompilation {
+    /**
+     * The full path to the USE OCL binary. Something like /usr/local/bin/use
+     */
+    public readonly useoclPath: string
+    /**
+     * The name of the compilation. Something like "lea state compilation"
+     * or "class model model compilation"
+     */
+    public readonly compilationLabel : string
+    public shellProcessorResult: ShellProcessorResult | null
+    protected processorResult: ShellProcessorResult
+
+    protected constructor(useoclPath: string, compilationLabel: string) {
+        this.useoclPath = useoclPath
         this.shellProcessorResult = null
-        this.commandLabel = commandLabel
+        this.compilationLabel = compilationLabel
     }
 
-    getCommand() : string {
-        throw new Error('getCommand() must be implemented')
-    }
+    /**
+     * Shell command line. Something like "use ..."
+     */
+    abstract getCommand() : string
 
     __getErroneousCommand() { // could be used to test error
         if (false) {        // TEST: just output
@@ -45,19 +58,17 @@ export class AbstractCompilation{
         }
     }
 
-    bindProcessorResult() {
-        throw new Error('bindProcessorResult() must be implemented')
-    }
+    abstract bindProcessorResult(): void
 
     /**
      *
      * // @returns {Promise<ShellProcessorResult>}
      */
-    async doCompile() {
+    async doCompile(): Promise<ShellProcessorResult> {
         const shell_command = new ShellCommand(
             this.getCommand(),
             summarizeErrors,
-            this.commandLabel,
+            this.compilationLabel,
             true)
         await shell_command.execute()
         this.processorResult = new ShellProcessorResult(shell_command)
@@ -67,10 +78,10 @@ export class AbstractCompilation{
 }
 
 
-class ClassModelCompilation extends AbstractCompilation {
-    private classModelAST: any;
+class ClassModelCompilation extends AbstractUSEOCLCompilation {
+    private classModelAST: any
 
-    constructor(classModelAST, usePath) {
+    constructor(classModelAST, usePath: string) {
         super(usePath, 'class model compilation')
         console.assert(classModelAST instanceof AST, classModelAST)
         console.assert(classModelAST.role === "class")
@@ -78,12 +89,12 @@ class ClassModelCompilation extends AbstractCompilation {
     }
 
     getTraceFilename() {
-        return this.classModelAST.filename + '.utc'
+        return this.classModelAST.filename + '.out'
     }
 
     getCommand() {
         return (
-            this.usePath  // TODO: deal with incorrect use installation
+            this.useoclPath  // TODO: deal with incorrect use installation
             + ' -c '
             + this.classModelAST.filename
             + ' > '
@@ -98,16 +109,14 @@ class ClassModelCompilation extends AbstractCompilation {
 }
 
 
-class StateModelCompilation extends AbstractCompilation {
+class StateModelCompilation extends AbstractUSEOCLCompilation {
     private classModelAST: AST
     private stateModelAST: AST
 
     constructor(classModelAST: AST, stateModelAST: AST, usePath: string) {
         const state_name = stateModelAST.elements[0].name
         super(usePath, state_name+' state compilation')
-        console.assert(classModelAST instanceof AST, classModelAST)
         console.assert(classModelAST.role === "class")
-        console.assert(stateModelAST instanceof AST, stateModelAST)
         console.assert(stateModelAST.role === "state")
         this.classModelAST = classModelAST
         this.stateModelAST = stateModelAST
@@ -120,7 +129,7 @@ class StateModelCompilation extends AbstractCompilation {
 
     getCommand() {
         return (
-            this.usePath
+            this.useoclPath
             + ' -qv '
             + this.classModelAST.filename   // TODO: check filename
             + ' '
@@ -138,19 +147,22 @@ class StateModelCompilation extends AbstractCompilation {
 
 
 export class USEOCLProcessor extends AbstractProcessor {
-    private generator: any;
-    private processorEnabled: any;
-    private usePath: any;
+    private readonly generator: USEOCLGenerator
+    private readonly processorEnabled: boolean
+    private readonly usePath: string
 
     constructor(generator, debug = true) {
         super(debug)
         this.generator = generator
-        // this.processorEnabled = useocl.compilation.use.path
+
         this.processorEnabled = app.preferences.get('useocl.compilation.compile')
+        // TODO: check value
+
         this.usePath = app.preferences.get("useocl.compilation.use.path")
+        // TODO: check value
     }
 
-    isProcessorEnabled() {
+    isProcessorEnabled(): boolean {
         return this.processorEnabled
     }
 
@@ -179,7 +191,7 @@ export class USEOCLProcessor extends AbstractProcessor {
     async doProcess() {
         console.log('====================== Compilation start')
 
-        const class_model_ast = this.generator.classModelAST
+        const class_model_ast: AST = this.generator.classModelAST
         const class_model_processor_result = (
             await this.processClassModel(
                 class_model_ast))
@@ -211,5 +223,3 @@ export class USEOCLProcessor extends AbstractProcessor {
 
 
 }
-
-exports.USEOCLProcessor = USEOCLProcessor
