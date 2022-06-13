@@ -24,7 +24,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TraceErrorReporter = exports.TracedLocation = void 0;
+exports.TracedErrorReporter = exports.TracedError = exports.TracedLocation = void 0;
 var fs = require("fs");
 function numberOrNull(value) {
     var x = parseInt(value);
@@ -170,24 +170,27 @@ function firstTraceLocation(javascriptFileTraced, errorObject) {
     }
 }
 /**
- * Exception raised by TraceErrorReporter
+ * Exception raised by TraceErrorReporter. This exception is raised but
+ * then catched by
  */
 var TracedError = /** @class */ (function (_super) {
     __extends(TracedError, _super);
-    function TracedError(message, component, location) {
+    function TracedError(reporter, message, component, location) {
         var _this = _super.call(this, message) || this;
+        _this.reporter = reporter;
         _this.component = component;
         _this.location = location;
         return _this;
     }
     return TracedError;
 }(Error));
+exports.TracedError = TracedError;
 /**
  * Utility to report an error where the error is located to the
- * last position in trace.
+ * last position in a given file.
  * No event is emitted.
  */
-var TraceErrorReporter = /** @class */ (function () {
+var TracedErrorReporter = /** @class */ (function () {
     /**
      * Report an error.
      * @param {string} javascriptFileToTrace the name of the javascript file
@@ -201,7 +204,7 @@ var TraceErrorReporter = /** @class */ (function () {
      * NOTE: the error is not thrown by this constructor. Use throw() to
      * throw the actual error.
      */
-    function TraceErrorReporter(javascriptFileToTrace, component, messageOrException) {
+    function TracedErrorReporter(javascriptFileToTrace, component, messageOrException) {
         this.javascriptFileToTrace = javascriptFileToTrace;
         this.component = component;
         if (messageOrException instanceof Error) {
@@ -214,21 +217,21 @@ var TraceErrorReporter = /** @class */ (function () {
         }
         this.location = firstTraceLocation(javascriptFileToTrace, this.exception);
     }
-    TraceErrorReporter.prototype.throw = function () {
+    TracedErrorReporter.prototype.throw = function () {
         if (this.exception) {
             throw this.exception;
         }
         else {
-            throw new TracedError(this.fullMessage(), this.component, this.location);
+            throw new TracedError(this, this.fullMessage(), this.component, this.location);
         }
     };
-    TraceErrorReporter.prototype.fullMessage = function () {
+    TracedErrorReporter.prototype.fullMessage = function () {
         return ('Error reported by the "' + this.component + '" component:\n'
             + this.message
             + ('\n' + this.location.getPositionDescription('' +
                 'Last user location:')));
     };
-    return TraceErrorReporter;
+    return TracedErrorReporter;
 }());
-exports.TraceErrorReporter = TraceErrorReporter;
+exports.TracedErrorReporter = TracedErrorReporter;
 //# sourceMappingURL=traces.js.map

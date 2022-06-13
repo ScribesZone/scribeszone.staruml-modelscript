@@ -186,14 +186,22 @@ function firstTraceLocation(
 }
 
 /**
- * Exception raised by TraceErrorReporter
+ * Exception raised by TraceErrorReporter. This exception is raised but
+ * then catched by
  */
-class TracedError extends Error {
-    public component: string
-    private location: TracedLocation
+export class TracedError extends Error {
+    public readonly component: string
+    public readonly reporter: TracedErrorReporter
+    public readonly location: TracedLocation
 
-    constructor(message: string, component: string, location: TracedLocation) {
+    constructor(
+        reporter: TracedErrorReporter,
+        message: string,
+        component: string,
+        location: TracedLocation
+    ) {
         super(message)
+        this.reporter = reporter
         this.component = component
         this.location = location
     }
@@ -203,10 +211,10 @@ class TracedError extends Error {
 
 /**
  * Utility to report an error where the error is located to the
- * last position in trace.
+ * last position in a given file.
  * No event is emitted.
  */
-export class TraceErrorReporter {
+export class TracedErrorReporter {
     public readonly component: string
     public readonly message: string
     public readonly exception: Error | null
@@ -250,6 +258,7 @@ export class TraceErrorReporter {
             throw this.exception
         } else {
             throw new TracedError(
+                this,
                 this.fullMessage(),
                 this.component,
                 this.location)
