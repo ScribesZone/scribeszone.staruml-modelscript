@@ -6,12 +6,25 @@
             "text": "ModelScript",
             "type": "section"
         },
-        "useocl.generation.structure": {
-            "text": "Use ModelScript artefact structure",
-            "description": "Generates files using ModelScript artefact structure. ",
-
-            "type": "check",
-            "default": false
+        "useocl.generation.layout": {
+            "text": "Directory layout for generated artefacts",
+            "description": "Defines in which directory modelscript files are generated.",
+            "type": "dropdown",
+            "options": [
+                {
+                    "value": 0,
+                    "text": "build/*"
+                },
+                {
+                    "value": 1,
+                    "text": "*"
+                },
+                {
+                    "value": 2,
+                    "text": "modelscript"
+                }
+            ],
+            "default": 0
         },
         "useocl.generation.debug": {
             "text": "Debug code generator",
