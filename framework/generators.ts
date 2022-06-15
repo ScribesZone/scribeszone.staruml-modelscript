@@ -5,9 +5,15 @@ import * as path from "path"
 
 import * as staruml from './staruml'
 
-import { AST, ASTCollection, Category } from "./asts"
+import {
+    AST,
+    ASTCollection,
+    Category,
+    ASTTracedErrorReporter,
+    Token, Line, ASTFuns
+} from "./asts"
+import { TracedError } from "./traces"
 import { asString } from "./models"
-import { TraceErrorReporter, TracedError } from './traces'
 
 
 export enum GeneratorStatus {
@@ -18,11 +24,53 @@ export enum GeneratorStatus {
     UNNAMED_PROJECT = ''
 }
 
+/**
+ * Helper to compute easily output file base on
+ * project file using its path and basename
+ * (for instance /h/zarwinn/proj.mdj
+ *
+ * @param extension extension of the generated file.
+ * @param relativeDirectory directory where the file as to be saved.
+ * @param basename the name of the file. See below.
+ *
+ * relativeDirectory is appended to the path. Default to
+ * "." so by default the output file will be in the same
+ * directory.
+ *
+ * If set basename is the name of the output file.
+ * Otherwise the basename of the project is used.
+ *
+ * With projectFile being the path given above and f
+ * this function :
+ *
+ *   f('.use') = /h/zarwinn/./proj.use
+ *   f('.use','mod/a') = /h/zarwinn/mod/a/proj.use
+ *   f('.java','mod/a', 'person') = /h/zarwinn/mod/a/person.java
+ */
+
+export function getProjectBasedFilename(
+        extension: string,
+        relativeDirectory: string = '.',
+        basename: string | null = null) {
+    console.assert(extension[0] === ".", extension)
+    const parts = path.parse(app.project.filename)
+    const fileDirectory = path.join(parts.dir, relativeDirectory)
+    const fileBasename = (basename ? basename : parts.name)
+    // noinspection UnnecessaryLocalVariableJS
+    const filename = path.join(
+        fileDirectory,
+        fileBasename + extension)
+    return filename
+}
 
 /*=========================================================================
 *             Generators
 * =========================================================================
  */
+
+
+export interface GeneratorFuns extends ASTFuns {
+}
 
 
 // noinspection PointlessBooleanExpressionJS,UnreachableCodeJS
@@ -34,6 +82,7 @@ export enum GeneratorStatus {
  * open/write/save AST without knowing of AST and ASTCollections.
  * the details of the AS
  */
+
 export abstract class AbstractGenerator {
     public readonly astCollection: ASTCollection
     public status: GeneratorStatus
@@ -48,7 +97,7 @@ export abstract class AbstractGenerator {
     private postGenerateFun: Function | null
 
     protected constructor(debug = true,
-                          eventFns = undefined) {
+                          eventFns : GeneratorFuns = {} ) {
         this.astCollection = new ASTCollection(this, debug, eventFns)
         this.status = GeneratorStatus.UNDEFINED
         this.debug = debug
@@ -79,53 +128,9 @@ export abstract class AbstractGenerator {
 
     // TODO: move this function to misc module
 
-    /**
-     * Helper to compute easily output file base on
-     * project file using its path and basename
-     * (for instance /h/zarwinn/proj.mdj
-     *
-     * @param extension extension of the generated file.
-     * @param relativeDirectory directory where the file as to be saved.
-     * @param basename the name of the file. See below.
-     *
-     * relativeDirectory is appended to the path. Default to
-     * "." so by default the output file will be in the same
-     * directory.
-     *
-     * If set basename is the name of the output file.
-     * Otherwise the basename of the project is used.
-     *
-     * With projectFile being the path given above and f
-     * this function :
-     *
-     *   f('.use') = /h/zarwinn/./proj.use
-     *   f('.use','mod/a') = /h/zarwinn/mod/a/proj.use
-     *   f('.java','mod/a', 'person') = /h/zarwinn/mod/a/person.java
-     */
 
-     getProjectBasedFilename(
-            extension: string,
-            relativeDirectory: string = '.',
-            basename: string | null = null) {
-        // @tscheck
-        // console.assert(
-        //     typeof extension === 'string'
-        //     && extension[0] === ".",
-        //     extension)
-        // console.assert(
-        //     typeof relativeDirectory === 'string', relativeDirectory)
-        // console.assert(
-        //     basename === null
-        //     || typeof basename === 'string', basename)
-        const parts = path.parse(app.project.filename)
-        const fileDirectory = path.join(parts.dir, relativeDirectory)
-        const fileBasename = (basename ? basename : parts.name)
-        // noinspection UnnecessaryLocalVariableJS
-        const filename = path.join(
-            fileDirectory,
-            fileBasename + extension)
-        return filename
-    }
+
+
 
     //---------------------------------------------------------------------
     // methods wrapping AST and ASTCollection
@@ -135,18 +140,16 @@ export abstract class AbstractGenerator {
 
     protected openAST(
         filename: string,
+        label: string = "",
         role: string = "main",
         elements: Array<staruml.Element> = []
     ) : AST  {
-        // @tscheck
-        // console.assert(typeof filename === 'string', filename)
-        // console.assert(typeof role === 'string', role)
-        // console.assert(elements instanceof Array, elements)
         console.assert(
             elements.every( element => element instanceof type.Model),
             elements)
         return this.astCollection.openAST(
             filename,
+            label,
             role,
             elements)
     }
@@ -158,8 +161,8 @@ export abstract class AbstractGenerator {
     private checkCurrentAST() {
         if (this.astCollection.currentAST === null) {
             const message = "currentAST is null."
-            new TraceErrorReporter(
-                'asts',
+            new ASTTracedErrorReporter(  // TODO: emit a generator level error
+                'asts',   // TODO: currently we have no event except at ast level
                 message,
                 this.eventFns).throw()
         }
@@ -235,7 +238,7 @@ export abstract class AbstractGenerator {
 
 
 
-    private showError() {
+    private showError() {   // TODO: this should go elsewhere
         this.checkCurrentAST()
         if (this.errorMessage) {
             this.errorMessage.split('\n').reverse().forEach( line => {
@@ -246,7 +249,7 @@ export abstract class AbstractGenerator {
     }
 
     // noinspection JSMethodCanBeStatic
-    private showSuccess() {
+    private showSuccess() {       // TODO: this should go elsewhere
         app.toast.info('file saved', 30)
     }
 
@@ -305,7 +308,8 @@ export abstract class AbstractGenerator {
                     + "Use DevTools to see issues : Alt+Shift+T")
                 this.status = GeneratorStatus.EXCEPTION
                 this.showError()
-                new TraceErrorReporter('generator', error, this.eventFns).throw()
+                new ASTTracedErrorReporter( // TODO: fix this
+                    'generator', error, this.eventFns).throw()
             }
         }
 

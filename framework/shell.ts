@@ -4,21 +4,16 @@ import { exec } from "child_process"
  * ShellCommandResult. The result of a ShellCommand with the optional
  * error, stderr, and stdout.
  */
-export class ShellCommandResult {
+export class ShellCommandResult  {
     private readonly shellCommand: ShellCommand
     public readonly error: Error | null
     public readonly stderr: string
     public readonly stdout: string
 
-    constructor(shellCommand: ShellCommand,
+    constructor(shellCommand: ShellCommand ,
                 error: Error | null,
                 stdout: string,
                 stderr: string ) {
-        // @ts-check
-        // console.assert(shellCommand instanceof ShellCommand)
-        // console.assert( error === null || error instanceof Error)
-        // console.assert(typeof stdout === 'string')
-        // console.assert(typeof stderr === 'string')
         this.shellCommand = shellCommand
         this.error = error
         this.stderr = stderr
@@ -59,28 +54,26 @@ export class ShellCommandResult {
         // https://ali-dev.medium.com/how-to-use-promise-with-exec-in-node-js-a39c4d7bbf77
 
 /**
- * A ShellCommand that can be executed and that leads to a ShellCommandResult
+ * A ShellCommand that can be executed and that leads to a ShellCommandResult.
+ * If a postExecutionFun is provided return as well the PostExecutionResult.
  */
+
+type PostExecutionFun =
+    (result: ShellCommandResult) => any
 
 export class ShellCommand {
     public readonly command: string;
     public readonly label: string
     public result: ShellCommandResult | null
-    private readonly postExecutionFun: any;
+    private readonly postExecutionFun:
+        PostExecutionFun | null
     private readonly debug: boolean;
-    private postExecutionResult: any | ShellCommandResult | null;
+    private postExecutionResult: any | null
 
     constructor(command: string,
-                postExecutionFun: Function | null = null ,
+                postExecutionFun: PostExecutionFun | null = null,
                 label: string = '',  // mostly to simplify console messages
                 debug = false) {
-        // @ts-check
-        // console.assert(typeof command === 'string')
-        // console.assert(
-        //     postExecutionFun === null
-        //     || typeof postExecutionFun === 'function')
-        // @ts-check
-        // console.assert(typeof label === 'string')
         this.command = command
         this.label = label
         this.postExecutionFun = postExecutionFun
@@ -117,12 +110,13 @@ export class ShellCommand {
                         + (this.result.hasErrors() ? '' : 'no ')
                         + 'error.',
                         this)
+                    if (this.result.hasErrors()) {
+                        console.warn(this.result.getText())
+                    }
                 }
                 if (this.postExecutionFun) {
                     this.postExecutionResult = (
                         this.postExecutionFun(this.result))
-                } else {
-                    this.postExecutionResult = this.result
                 }
                 const that = this
                 resolve(that)

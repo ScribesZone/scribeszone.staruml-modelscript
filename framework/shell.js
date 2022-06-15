@@ -8,11 +8,6 @@ var child_process_1 = require("child_process");
  */
 var ShellCommandResult = /** @class */ (function () {
     function ShellCommandResult(shellCommand, error, stdout, stderr) {
-        // @ts-check
-        // console.assert(shellCommand instanceof ShellCommand)
-        // console.assert( error === null || error instanceof Error)
-        // console.assert(typeof stdout === 'string')
-        // console.assert(typeof stderr === 'string')
         this.shellCommand = shellCommand;
         this.error = error;
         this.stderr = stderr;
@@ -43,27 +38,12 @@ var ShellCommandResult = /** @class */ (function () {
     return ShellCommandResult;
 }());
 exports.ShellCommandResult = ShellCommandResult;
-// Note sure if it would be best to replace this code with
-// a promise. Await can be done only in async function
-// and execute is not.
-// SEE "How to use Promise with exec in Node.js"
-// https://ali-dev.medium.com/how-to-use-promise-with-exec-in-node-js-a39c4d7bbf77
-/**
- * A ShellCommand that can be executed and that leads to a ShellCommandResult
- */
 var ShellCommand = /** @class */ (function () {
     function ShellCommand(command, postExecutionFun, label, // mostly to simplify console messages
     debug) {
         if (postExecutionFun === void 0) { postExecutionFun = null; }
         if (label === void 0) { label = ''; }
         if (debug === void 0) { debug = false; }
-        // @ts-check
-        // console.assert(typeof command === 'string')
-        // console.assert(
-        //     postExecutionFun === null
-        //     || typeof postExecutionFun === 'function')
-        // @ts-check
-        // console.assert(typeof label === 'string')
         this.command = command;
         this.label = label;
         this.postExecutionFun = postExecutionFun;
@@ -91,12 +71,12 @@ var ShellCommand = /** @class */ (function () {
                         + '" returns '
                         + (_this.result.hasErrors() ? '' : 'no ')
                         + 'error.', _this);
+                    if (_this.result.hasErrors()) {
+                        console.warn(_this.result.getText());
+                    }
                 }
                 if (_this.postExecutionFun) {
                     _this.postExecutionResult = (_this.postExecutionFun(_this.result));
-                }
-                else {
-                    _this.postExecutionResult = _this.result;
                 }
                 var that = _this;
                 resolve(that);

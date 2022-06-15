@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShellProcessorResult = exports.ProcessorResult = exports.AbstractProcessor = void 0;
+exports.ShellProcessorResult = exports.AbstractProcessorResult = exports.AbstractProcessor = void 0;
 var AbstractProcessor = /** @class */ (function () {
     function AbstractProcessor(debug) {
         if (debug === void 0) { debug = true; }
@@ -30,12 +30,12 @@ var AbstractProcessor = /** @class */ (function () {
     return AbstractProcessor;
 }());
 exports.AbstractProcessor = AbstractProcessor;
-var ProcessorResult = /** @class */ (function () {
-    function ProcessorResult() {
+var AbstractProcessorResult = /** @class */ (function () {
+    function AbstractProcessorResult() {
     }
-    return ProcessorResult;
+    return AbstractProcessorResult;
 }());
-exports.ProcessorResult = ProcessorResult;
+exports.AbstractProcessorResult = AbstractProcessorResult;
 var ShellProcessorResult = /** @class */ (function (_super) {
     __extends(ShellProcessorResult, _super);
     function ShellProcessorResult(shellCommand) {
@@ -44,6 +44,6 @@ var ShellProcessorResult = /** @class */ (function (_super) {
         return _this;
     }
     return ShellProcessorResult;
-}(ProcessorResult));
+}(AbstractProcessorResult));
 exports.ShellProcessorResult = ShellProcessorResult;
 //# sourceMappingURL=processors.js.map

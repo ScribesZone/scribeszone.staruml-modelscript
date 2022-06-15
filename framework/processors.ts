@@ -1,4 +1,4 @@
-import { ShellCommand } from "./shell";
+import { ShellCommand, ShellCommandResult } from "./shell";
 
 
 export abstract class AbstractProcessor {
@@ -14,21 +14,24 @@ export abstract class AbstractProcessor {
         this.postProcessResult = null
     }
 
-    abstract isProcessorEnabled()
+    abstract isProcessorEnabled(): boolean
 
     setCompilationPanel(compilationPanel): void {
         this.compilationPanel = compilationPanel
     }
 
-    abstract doProcess()
+    abstract doProcess():
 }
 
-export class ProcessorResult {
+
+export class AbstractProcessorResult {
 
 }
 
-export class ShellProcessorResult extends ProcessorResult {
-    shellCommand: ShellCommand
+
+export class ShellProcessorResult extends AbstractProcessorResult {
+    public readonly shellCommand: ShellCommand
+
     constructor(shellCommand: ShellCommand) {
         super()
         this.shellCommand = shellCommand
