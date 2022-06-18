@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElementListPanel = exports.CustomPanel = void 0;
-var fs = require("fs");
-var path = require("path");
+import * as fs from "fs"
+import * as path from"path"
+
 /**
 
 This module defines two kinds of panels :
