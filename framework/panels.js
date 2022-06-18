@@ -248,4 +248,3 @@ var ElementListPanel = /** @class */ (function () {
     return ElementListPanel;
 }());
 exports.ElementListPanel = ElementListPanel;
-//# sourceMappingURL=panels.js.map
