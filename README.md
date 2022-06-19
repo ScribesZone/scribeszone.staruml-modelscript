@@ -16,7 +16,8 @@ directory](https://docs.staruml.io/developing-extensions/getting-started#create-
 * Windows: C:\Users\<user>\AppData\Roaming\StarUML\extensions\user
 * ~/.config/StarUML/extensions/user 
 
-Select the directory suited to your OS and in a shell windows enter:
+Select the directory suited to your OS and enter the
+following commands in a shell window:
 
     cd the_config_dir_as_mentioned_above
     git clone https://github.com/ScribesZone/scribeszone.staruml-modelscript
