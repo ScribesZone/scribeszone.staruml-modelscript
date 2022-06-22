@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ElementListPanel = exports.CustomPanel = void 0;
-import * as fs from "fs"
-import * as path from"path"
-
+var fs = require("fs");
+var path = require("path");
 /**
 
 This module defines two kinds of panels :
@@ -249,3 +248,4 @@ var ElementListPanel = /** @class */ (function () {
     return ElementListPanel;
 }());
 exports.ElementListPanel = ElementListPanel;
+//# sourceMappingURL=panels.js.map

@@ -18,7 +18,6 @@ const ENABLE_CODE_INTERFACE = false
 
 const ENABLE_PROCESSOR = true
 
-
 import { CustomPanel }      from "./framework/panels"
 import { CodeInterface }    from "./framework/renderer"
 import { AST }              from "./framework/asts"
@@ -27,7 +26,6 @@ import { Beautifier }       from "./beautifier"
 import { CheckerRegistry }  from "./checker"
 import { USEOCLGenerator }  from "./generator"
 import { USEOCLProcessor }  from "./processor"
-
 
 const EXTENSION = {
     "id": 'useocl',
