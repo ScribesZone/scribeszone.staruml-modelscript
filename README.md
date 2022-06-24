@@ -6,7 +6,6 @@ Class and object models propulsed by [USE OCL](https://sourceforge.net/projects/
 
 **THIS IS A PRELIMINARY EXPERIMENTAL VERSION, DOT NOT USE FOR PRODUCTION.**
 
-
 Installation
 ------------
 
