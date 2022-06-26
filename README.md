@@ -4,7 +4,6 @@ ModelScript plugin for StarUML
 **Preliminary version** of [ModelScript](https://modelscript.readthedocs.io/en/latest/) plugin for [StarUML](https://staruml.io/) environment. 
 Class and object models propulsed by [USE OCL](https://sourceforge.net/projects/useocl/) tool (by University of bremen).
 
-
 **THIS IS A PRELIMINARY EXPERIMENTAL VERSION, DOT NOT USE FOR PRODUCTION.**
 
 Installation
