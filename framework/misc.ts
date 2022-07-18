@@ -1,13 +1,7 @@
-import {isString} from "util"
-const path = require('path')
-const fs = require('fs');
+import * as fs from 'fs'
 
+const DEBUG = true
 const TEST_ASSERT = true
-
-
-//-------------------------------------------------------------------------
-//  type checking
-//-------------------------------------------------------------------------
 
 
 //-------------------------------------------------------------------------
@@ -25,6 +19,25 @@ if (TEST_ASSERT) {
 }
 
 
+function arrayEquals<T>(a: Array<T>, b: Array<T>, sort: boolean = false) {
+    const x = a
+    if (sort) {
+        x.sort()
+    }
+    const y = b
+    if (sort) {
+        b.sort()
+    }
+    return a.every((val, index) => val === b[index])
+}
+
+
+if (TEST_ASSERT) {
+    console.assert(arrayEquals([1, 2, 3], [1, 2, 3], true) === true)
+    console.assert(arrayEquals([3, 2], [2, 3], true) === true)
+    console.assert(arrayEquals([1, 2], [1, 3]) === false)
+}
+
 /**
  * Filter the entries of an object via a predicate.
  *
@@ -32,8 +45,6 @@ if (TEST_ASSERT) {
  *
  *      noezarwin = {firstname: 'noe', lastname: 'zarwin', age: 30}
  *      keys = ['firstname', 'age']
- *
-
  *
  *      returns {age: 30}
  *
@@ -68,7 +79,7 @@ if (TEST_ASSERT) {
  * @param small the array of elements that could be included
  * @returns {*}
  */
-function includesAll(big,small) {
+function includesAll<T>(big: Array<T>, small: Array<T>) {
     return small.every(v => big.includes(v))
 }
 
@@ -78,109 +89,162 @@ function includesAll(big,small) {
 //     Pattern matching
 //-------------------------------------------------------------------------
 
-// const MINIMAL_PATTERN_KEYS = ['name', 'regex']
-
-interface TextPattern {
-    name: string
-    regex: string
-    ignore: boolean
-    formatFun?: Function
+export enum TextPatternAction {
+    replace = 'replace',
+    ignore = 'ignore'
 }
 
-// function isLikePattern(object) {
-//     return includesAll(Object.keys(object),MINIMAL_PATTERN_KEYS)
-// }
+type MatchMapping = {[key: string]: string}
+/**
+ * A named pattern with a replacement function generating a simplified text
+ * from a match. This type is used by the TextMatcher class.
+ */
+export interface TextPattern {
+    name: string
+    regex: RegExp
+    /**
+     * Indicate if the pattern must be matched and ignored or matched
+     * and replaced.
+     */
+    action: TextPatternAction
+    /**
+     * List of variables that must be defined. No other variables are
+     * allowed.
+     */
+    variables: Array<string>
+    /**
+     * Section to which this Pattern will be stored
+     */
+    section: string
+    /**
+     * Function producing a replacement string from a regexp match result
+     * @param match
+     */
+    replaceFun?: (g: MatchMapping) => string  // TODO: add the type for match. Not so easy.
+}
 
 
 class TextMatch {
-    private readonly pattern: TextPattern;
-    private readonly groups: any;
-    private readonly formatedResult: string | null;
+    readonly pattern: TextPattern
+    readonly groups: MatchMapping
+    readonly replacement: string | null
 
     constructor(pattern: TextPattern, groups) {
-        // console.assert(isLikePattern(pattern),'MI162')
-        // console.assert(isArray(groups), 'MI163')
-
         this.pattern = pattern
         this.groups = groups
-        this.formatedResult = null
-
-        const formatFun = pattern.formatFun
-        if (formatFun) {
-            //console.assert(isFunction(formatFun), 'MI171')
-            this.formatedResult = formatFun(this.groups)
-            // console.assert(isString(this.formatedResult), 'MI173')
+        const replaceFun = pattern.replaceFun
+        if (replaceFun !== undefined) {
+            this.replacement = replaceFun(this.groups)
+        } else {
+            this.replacement = null
         }
     }
 
+    // toString() {
+    //     return this.pattern.name+' '+this.pattern.action+' '
+    // }
 }
 
 /**
- * A text from which patterns are matched and replaced to other strings.
- * Return the text remaining after all pattern replacements as well
- * as an unordered serie of matches grouped by pattern name.
+ * A text from which patterns are matched and replaced by other strings.
+ * Returns the text remaining after all pattern replacements as well
+ * as an unordered series of matches grouped by pattern name.
  * NOTE: the matches are not ordered by original position of the matched
  * text since patterns are extracted in sequence.
  */
 export class TextMatcher {
-    private readonly originalText: string
-    private residualText: string
-    private activeMatchesByPatternName: {};
-    private nbOfActiveMatches: number;
-    private nbOfIgnoredMatches: number;
+    readonly originalText: string
+    /** Text remaining after all matches have been removed */
+    residualText: string
+    readonly replacedMatchesByPatternName: Map<string, Array<TextMatch>>
+    nbOfReplacedMatches: number
+    nbOfIgnoredMatches: number
+    sections: Set<string>
+    debug: boolean
 
     constructor(text: string) {
         this.originalText = text
         this.residualText = text
-        this.activeMatchesByPatternName = {} // TODO Map[Array[Object]]  see _addToMatches()
-        this.nbOfActiveMatches = 0
+        this.replacedMatchesByPatternName = new Map()
+        this.nbOfReplacedMatches = 0
         this.nbOfIgnoredMatches = 0
+        this.sections = new Set()
     }
 
     /**
      * Extract from the original text as many pieces of text matching
      * the given pattern and replace each match with the replacement
-     * string. No match is stored if the pattern has ignore: true.
-     * @param pattern An  object with "name", "regex", "ignore"
-     * @param replacement A string for replacement or '' by default.
+     * string if not ignored. No match is stored if the pattern has
+     * toBeIgnored.
      */
-    extractPattern(pattern: TextPattern, replacement: string = '') {
-        let match
+    extractPattern(pattern: TextPattern, replacement: string = '[O]') {
+        let match : RegExpExecArray | null
         const regex = pattern["regex"]
-        // @ts-ignore .exec TODO
+        if (this.debug) {
+            console.log(`DG:148: trying pattern ${pattern.name} ${pattern.action}`)
+        }
         while (match = regex.exec(this.residualText) ) {
-            let groups = match.groups
-            if (groups !== undefined) {
-                this._addToMatches(pattern, groups)
+            let match_mapping : MatchMapping
+            if (match.groups === undefined) {
+                match_mapping = {}
+            } else {
+                match_mapping = match.groups
             }
+            // // check if the pattern matches some text
+            // const groups = match.groups
+            // // there is a match
+            // if (groups === undefined) {
+            //     if (DEBUG) {
+            //         console.log(`   DG:159: '${pattern.name}' match ${pattern.action}. No group.`)
+            //     }
+            // } else {
+            //     if (DEBUG) {
+            //         console.log(`   DG:160: '${pattern.name}' match ${pattern.action}`, groups)
+            //     }
+            this._addToMatches(pattern, match_mapping)
+            // }
             this.residualText = this.residualText.replace(regex, replacement)
         }
     }
+
 
     /**
      * Extract the given list of patterns in given order. See
      * extractPattern for details.
      */
-    extractPatterns(patterns: TextPattern[], replacement: string = '') {
-        //console.assert(isArray(patterns), 'MI223')
-        //console.assert(isString(replacement), 'MI224')
+    extractPatterns(patterns: Array<TextPattern>, replacement: string = '') {
         for (let pattern of patterns) {
             this.extractPattern(pattern, replacement)
         }
     }
 
-    _addToMatches(pattern: TextPattern, groups) {
-        // console.assert(isLikePattern(pattern), 'MI231')
+    _checkVariables(pattern: TextPattern, mapping: MatchMapping) {
+        const actual_variables = Object.keys(mapping)
+        const expected_variables = pattern.variables
+        if (! arrayEquals(actual_variables, expected_variables, true)) {
+            console.error('Error in pattern matching')
+            console.error('  expected:', expected_variables)
+            console.error('  found:   ', actual_variables)
+            throw new Error('Error in parsing')
+        }
+
+    }
+
+    _addToMatches(pattern: TextPattern, mapping: MatchMapping) {
         const name = pattern.name
-        if (pattern.ignore) {
+        this._checkVariables(pattern, mapping)
+        if (pattern.action === TextPatternAction.ignore) {
+            // deal with a "ignore" pattern
             this.nbOfIgnoredMatches += 1
         } else {
-            this.nbOfActiveMatches = 0
-            if (this.activeMatchesByPatternName[name] === undefined) {
-                this.activeMatchesByPatternName[name] = []
+            // deal with a "replace" pattern
+            this.nbOfReplacedMatches += 1
+            if (! this.replacedMatchesByPatternName.has(name)) {
+                this.replacedMatchesByPatternName.set(name, [])
             }
-            const match = new TextMatch(pattern, groups)
-            this.activeMatchesByPatternName[name].push(match)
+            const match = new TextMatch(pattern, mapping)
+            this.replacedMatchesByPatternName.get(name)!.push(match)
+            this.sections.add(pattern.section)
         }
     }
 
@@ -188,16 +252,17 @@ export class TextMatcher {
     }
 }
 
-export function ensureDirectory(filePath) {
+/**
+ * Make sure that the directory exists and if it does not create it with
+ * all parents directories needed.
+ * @param filePath
+ */
+export function ensureDirectory(filePath: string): string {
     // fs.mkdir(
     //     filePath,
     //     { recursive: true },
     //     (err) => {
     //         if (err) throw err
     // })
-    fs.mkdirSync(filePath, { recursive: true })
+    return fs.mkdirSync(filePath, { recursive: true }) !
 }
-
-
-// exports.filterByKeyValue = filterByKeyValue
-// exports.TextMatcher = TextMatcher
