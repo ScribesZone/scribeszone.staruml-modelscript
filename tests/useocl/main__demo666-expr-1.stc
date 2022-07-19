@@ -28,7 +28,7 @@ Error: Unknown command `this is not a command'. Try `help'.
 -> '@@@25' : String
 <input>:1:7: Warning: application of `saintaxe' to a single value should be done with `.' instead of `->'.
 <input>:1:7: Undefined operation named `saintaxe' in expression `Integer.saintaxe()'.
--> '@@@26-' : String
+-> '@@@26' : String
 Detailed results of subexpressions:
   sandrine : Employee = Employee1
   sandrine.name : String = 'Sandrine'
@@ -42,7 +42,7 @@ Detailed results of subexpressions:
 <input>:2:7: Undefined operation `Integer.+(String)'.
 -> '@@@29' : String
 checking structure...
-checked structure in 0ms.
+checked structure in 1ms.
 checking invariants...
 checking invariant (1) `Department::i1a': OK.
 checking invariant (2) `Department::i2': OK.
@@ -68,7 +68,7 @@ checking invariant (4) `Employee::i3': OK.
 checking invariant (5) `Project::i1c': OK.
 checking invariant (6) `Project::i4': OK.
 checking invariant (7) `Project::i5': OK.
-checked 7 invariants in 0.006s, 1 failure.
+checked 7 invariants in 0.014s, 1 failure.
 -> '@@@30' : String
 checking structure...
 checked structure in 0ms.

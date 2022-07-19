@@ -4,7 +4,7 @@ checking structure...
 Multiplicity constraint violation in association `WorksIn':
   Object `sophie' of class `Employee' is connected to 0 objects of class `Department'
   at association end `departments' but the multiplicity is specified as `1..*'.
-checked structure in 2ms.
+checked structure in 1ms.
 checking invariants...
 checking invariant (1) `Department::i1a': OK.
 checking invariant (2) `Department::i2': OK.

@@ -14,7 +14,7 @@ Error: Object `Wheel1' is shared by object `Car1' and object `Car3'.
 Multiplicity constraint violation in association `HasWheel':
   Object `Wheel1' of class `Wheel' is connected to 3 objects of class `Car'
   at association end `car' but the multiplicity is specified as `1'.
-checked structure in 3ms.
+checked structure in 2ms.
 checking invariants...
 checked 0 invariants in 0.001s, 0 failures.
 -> '@@@9' : String
@@ -25,4 +25,4 @@ Multiplicity constraint violation in association `HasWheel':
   at association end `car' but the multiplicity is specified as `1'.
 checked structure in 1ms.
 checking invariants...
-checked 0 invariants in 0.001s, 0 failures.
+checked 0 invariants in 0.000s, 0 failures.

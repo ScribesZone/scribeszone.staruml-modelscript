@@ -22,7 +22,7 @@
 -> '@@@22' : String
 -> '@@@23' : String
 checking structure...
-checked structure in 1ms.
+checked structure in 0ms.
 checking invariants...
 checking invariant (1) `Department::i1a': OK.
 checking invariant (2) `Department::i2': OK.
