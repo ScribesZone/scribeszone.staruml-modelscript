@@ -10,13 +10,13 @@ import {TextPattern, TextPatternAction} from "../framework/patterns"
  * Error message localized in a well identified '.use' file.
  * Found only in .utc files.
  *
- * Example:
- *
+ * Examples:
+ *      main-comment-error.use:line 62:0 mismatched character '<EOF>' expecting '*'cat *.ut
  *      main.use:58:23: Undefined operation `Integer.>=(String)'.
  */
 export const USEFileIssuePattern: TextPattern = {
     name: 'USEFileIssuePattern',
-    regex: /^(?<file>.+.use):(?<line>\d+):(?<column>\d+): (?<message>[^\n]*)\n/m,
+    regex: /(?<file>.+.use):(line ?)?(?<line>\d+):(?<column>\d+)\:?(?<message>[^\n]*)\n?/m,
     action: TextPatternAction.replace,
     variables: ['file', 'line', 'column', 'message'],
     replaceFun: function (g) {
