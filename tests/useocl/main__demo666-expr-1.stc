@@ -68,7 +68,7 @@ checking invariant (4) `Employee::i3': OK.
 checking invariant (5) `Project::i1c': OK.
 checking invariant (6) `Project::i4': OK.
 checking invariant (7) `Project::i5': OK.
-checked 7 invariants in 0.014s, 1 failure.
+checked 7 invariants in 0.016s, 1 failure.
 -> '@@@30' : String
 checking structure...
 checked structure in 0ms.
