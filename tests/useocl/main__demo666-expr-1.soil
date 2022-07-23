@@ -1,3 +1,4 @@
+--
                                                                     ?'@@@1'
 !create computing : Department
                                                                     ?'@@@2'
@@ -46,7 +47,7 @@
                                                                     ?'@@@23'
 ! sandrine.salary := 2600
                                                                     ?'@@@24'
-this is not a command
+! this is an error
                                                                     ?'@@@25'
 ?? 2+3 -> saintaxe
                                                                     ?'@@@26'
@@ -61,3 +62,4 @@ this is not a command
                                                                     ?'@@@29'
 check -v -d
                                                                     ?'@@@30'
+--

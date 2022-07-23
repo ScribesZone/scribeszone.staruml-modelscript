@@ -20,8 +20,11 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SOILCheckAnswer = exports.MultiplicityViolation = exports.InvariantViolation = exports.SOILQueryAnswer = exports.QueryResult = exports.SOILStatementAnswer = exports.SOILGlobalIssue = exports.SOILLocalizedIssue = exports.SOILAnswer = exports.USEAnswer = exports.USEFileIssue = exports.AbstractAnswer = void 0;
 var strings_1 = require("../framework/strings");
+var assert = require("node:assert");
 function subExpressionsToString(label, subExpressions) {
-    return "[".concat(subExpressions.length, " ").concat(label, "]");
+    var r = "[".concat(subExpressions.length, " ").concat(label, "]");
+    assert((0, strings_1.isNoLineString)(r));
+    return r;
 }
 var AbstractAnswer = /** @class */ (function () {
     function AbstractAnswer() {
@@ -36,25 +39,42 @@ var USEFileIssue = /** @class */ (function () {
         this.message = message;
     }
     USEFileIssue.prototype.toString = function () {
-        return "ISSUE: ".concat(this.line, ":").concat(this.column, ":").concat(this.message);
+        var r = "ISSUE: ".concat(this.line, ":").concat(this.column, ":").concat(this.message);
+        assert((0, strings_1.isNoLineString)(r));
+        return r;
     };
     return USEFileIssue;
 }());
 exports.USEFileIssue = USEFileIssue;
+//=========================================================================
+//  USE answers
+//=========================================================================
 var USEAnswer = /** @class */ (function () {
     function USEAnswer(issues) {
         if (issues === void 0) { issues = []; }
         this.issues = issues;
     }
+    USEAnswer.prototype.hasIssues = function () {
+        return this.issues.length >= 1;
+    };
     USEAnswer.prototype.toString = function () {
-        return 'ANSWER: \n' + (0, strings_1.indent)(this.issues.map(function (i) { return i.toString(); }).join('\n'));
+        var r;
+        if (this.issues.length === 0) {
+            r = 'ANSWER: -\n';
+        }
+        else {
+            r = ('ANSWER:\n'
+                + (0, strings_1.indent)(this.issues.map(function (i) { return i.toString(); }).join('\n')) + ' \n');
+        }
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return USEAnswer;
 }());
 exports.USEAnswer = USEAnswer;
 //=========================================================================
 //  SOIL answers
-//=========================================================================-
+//=========================================================================
 var SOILAnswer = /** @class */ (function () {
     function SOILAnswer(localizedIssues, globalIssues) {
         if (localizedIssues === void 0) { localizedIssues = []; }
@@ -62,10 +82,20 @@ var SOILAnswer = /** @class */ (function () {
         this.localizedIssues = localizedIssues;
         this.globalIssues = globalIssues;
     }
+    SOILAnswer.prototype.hasIssues = function () {
+        return (this.localizedIssues.length > 0) || (this.globalIssues.length > 0);
+    };
     SOILAnswer.prototype.toString = function () {
-        return ('ANSWER: \n'
-            + (0, strings_1.indent)(this.localizedIssues.map(function (i) { return i.toString(); }).join('\n'))
-            + (0, strings_1.indent)(this.globalIssues.map(function (i) { return i.toString(); }).join('\n')));
+        var r = 'ANSWER:\n';
+        if (this.localizedIssues.length >= 1) {
+            r += (0, strings_1.indent)(this.localizedIssues.map(function (i) { return i.toString(); }).join('\n')) + '\n';
+        }
+        if (this.globalIssues.length >= 1) {
+            r += (0, strings_1.indent)(this.globalIssues.map(function (i) { return i.toString(); }).join('\n')) + '\n';
+        }
+        console.error('"""' + r + '"""');
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return SOILAnswer;
 }());
@@ -80,7 +110,9 @@ var SOILLocalizedIssue = /** @class */ (function () {
         this.message = message;
     }
     SOILLocalizedIssue.prototype.toString = function () {
-        return "ISSUE: ".concat(this.line, ":").concat(this.column, ":").concat(this.message);
+        var r = "ISSUE: ".concat(this.line, ":").concat(this.column, ":").concat(this.message);
+        assert((0, strings_1.isNoLineString)(r));
+        return r;
     };
     return SOILLocalizedIssue;
 }());
@@ -91,7 +123,9 @@ var SOILGlobalIssue = /** @class */ (function () {
         this.message = message;
     }
     SOILGlobalIssue.prototype.toString = function () {
-        return "ISSUE: '-':'-':".concat(this.kind, ":").concat(this.message);
+        var r = "ISSUE: '-':'-':".concat(this.kind, ":").concat(this.message);
+        assert((0, strings_1.isNoLineString)(r));
+        return r;
     };
     return SOILGlobalIssue;
 }());
@@ -99,10 +133,6 @@ exports.SOILGlobalIssue = SOILGlobalIssue;
 //-------------------------------------------------------------------------
 //  Statements answer
 //-------------------------------------------------------------------------
-//
-/**
- * Answer to statements.
- */
 var SOILStatementAnswer = /** @class */ (function (_super) {
     __extends(SOILStatementAnswer, _super);
     function SOILStatementAnswer(localizedIssues, globalIssues) {
@@ -114,8 +144,9 @@ var SOILStatementAnswer = /** @class */ (function (_super) {
         return _this;
     }
     SOILStatementAnswer.prototype.toString = function () {
-        return ('ANSWER:\n'
-            + (0, strings_1.indent)(_super.prototype.toString.call(this)));
+        var r = _super.prototype.toString.call(this);
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return SOILStatementAnswer;
 }(SOILAnswer));
@@ -123,6 +154,11 @@ exports.SOILStatementAnswer = SOILStatementAnswer;
 //-------------------------------------------------------------------------
 // Query result
 //-------------------------------------------------------------------------
+/**
+ * Result of a query. If errors are generated during the evaluation
+ * then instead of having a QueryResult, a  null value means no query result.
+ * The class below represents the case where there is a result.
+ */
 var QueryResult = /** @class */ (function () {
     function QueryResult(result, resultType, subExpressions) {
         this.result = result;
@@ -130,8 +166,12 @@ var QueryResult = /** @class */ (function () {
         this.subExpressions = subExpressions;
     }
     QueryResult.prototype.toString = function () {
-        return ("RESULT: ".concat(this.result, ": ").concat(this.resultType)
-            + subExpressionsToString('subExprs', this.subExpressions));
+        var r = "RESULT: ".concat(this.result, ": ").concat(this.resultType) + '\n';
+        r += (0, strings_1.indent)(this.subExpressions.join('\n')) + '\n';
+        // r += ensureNoNewLineAtEnd(this.subExpressions ?? '').split('\n').map(line => line.trim()) +'\n'
+        // r += subExpressionsToString('subExprs', this.subExpressions)
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return QueryResult;
 }());
@@ -141,7 +181,12 @@ exports.QueryResult = QueryResult;
  */
 var SOILQueryAnswer = /** @class */ (function (_super) {
     __extends(SOILQueryAnswer, _super);
-    function SOILQueryAnswer(localizedIssues, globalIssues, queryResult) {
+    function SOILQueryAnswer(localizedIssues, globalIssues, 
+    /**
+     * Result of the query. null means that an error occured in the use evaluation.
+     * For instance if the query is malformed.
+     */
+    queryResult) {
         if (localizedIssues === void 0) { localizedIssues = []; }
         if (globalIssues === void 0) { globalIssues = []; }
         if (queryResult === void 0) { queryResult = null; }
@@ -152,9 +197,13 @@ var SOILQueryAnswer = /** @class */ (function (_super) {
         return _this;
     }
     SOILQueryAnswer.prototype.toString = function () {
-        return ('ANSWER:\n'
-            + (0, strings_1.indent)(_super.prototype.toString.call(this))
-            + (0, strings_1.indent)(this.queryResult.toString()));
+        var r = _super.prototype.toString.call(this);
+        var query_result_text = ((this.queryResult === null)
+            ? 'RESULT: none\n'
+            : this.queryResult.toString());
+        r += (0, strings_1.indent)(query_result_text);
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return SOILQueryAnswer;
 }(SOILAnswer));
@@ -170,10 +219,12 @@ var InvariantViolation = /** @class */ (function () {
         this.subExpressions = subExpressions;
     }
     InvariantViolation.prototype.toString = function () {
-        return ('INVARIANT VIOLATION:'
+        var r = ('INVARIANT VIOLATION: '
             + this.className + '.' + this.invariantName
-            + ' (' + this.faultyObjects.join(',') + ') '
-            + subExpressionsToString('subExprs', this.subExpressions));
+            + ' (' + this.faultyObjects.join(',') + ') ');
+        r += (0, strings_1.indent)(this.subExpressions.join('\n')) + '\n';
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return InvariantViolation;
 }());
@@ -188,9 +239,11 @@ var MultiplicityViolation = /** @class */ (function () {
         this.cardinality = cardinality;
     }
     MultiplicityViolation.prototype.toString = function () {
-        return ('MULTIPLICITY VIOLATION: '
+        var r = ('MULTIPLICITY VIOLATION: '
             + "card(".concat(this.object, ".").concat(this.targetRole, ")=").concat(this.numberOfObjects)
-            + " but card(".concat(this.sourceClass, ").").concat(this.targetRole, "=").concat(this.cardinality));
+            + " but card(".concat(this.sourceClass, ").").concat(this.targetRole, "=").concat(this.cardinality, "\n"));
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
     };
     return MultiplicityViolation;
 }());
@@ -212,6 +265,18 @@ var SOILCheckAnswer = /** @class */ (function (_super) {
         _this.multiplicityViolations = multiplicityViolations;
         return _this;
     }
+    SOILCheckAnswer.prototype.toString = function () {
+        var r = _super.prototype.toString.call(this);
+        if (this.multiplicityViolations.length >= 1) {
+            r += (0, strings_1.indent)(this.multiplicityViolations.map(function (v) { return v.toString(); }).join('\n'));
+        }
+        if (this.invariantViolations.length >= 1) {
+            r += (0, strings_1.indent)(this.invariantViolations.map(function (v) { return v.toString(); }).join('\n'));
+        }
+        console.error('"""' + r + '"""');
+        assert((0, strings_1.isLineEnded)(r));
+        return r;
+    };
     return SOILCheckAnswer;
 }(SOILAnswer));
 exports.SOILCheckAnswer = SOILCheckAnswer;

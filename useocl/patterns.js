@@ -5,6 +5,7 @@ var patterns_1 = require("../framework/patterns");
 //-------------------------------------------------------------------------
 //       Issues
 //-------------------------------------------------------------------------
+// TODO: replaceFun
 /**
  * Error message localized in a well identified '.use' file.
  * Found only in .utc files.
@@ -32,14 +33,15 @@ exports.USEFileIssuePattern = {
  * Example:
  *
  *      <input>:1:0: Variable `Oooops' in expression `Oooops.monday' is undefined.
+ *      <input>:line 1:5 missing EOF at 'is'"
  *
  * Regex:
  *
- *      ^<input>:(?<line>\d+):(?<column>\d+): (?<Type>(Error|Warning): )?(?<message>[^\n]*)\n
+ *      -
  */
 exports.SOILLocalizedIssuePattern = {
     name: 'SOILLocalizedIssue',
-    regex: /^<input>:(?<line>\d+):(?<column>\d+): (?<message>[^\n]*)\n/m,
+    regex: /^<input>:(line )?(?<line>\d+):(?<column>\d+):? ?(?<message>[^\n]*)\n?/m,
     action: patterns_1.TextPatternAction.replace,
     variables: ['line', 'column', 'message'],
     replaceFun: function (g) {
@@ -59,7 +61,7 @@ exports.SOILLocalizedIssuePattern = {
  */
 exports.SOILGlobalIssuePattern = {
     name: 'SOILGlobalIssuePattern',
-    regex: /^(?<kind>(Error|Warning)): (?<message>[^\n]*)\n/m,
+    regex: /^(?<kind>(Error|Warning)): (?<message>[^\n]*)\n?/m,
     action: patterns_1.TextPatternAction.replace,
     variables: ['kind', 'message'],
     replaceFun: function (g) {
@@ -110,7 +112,7 @@ exports.InvariantViolationPattern = {
  */
 exports.InvariantOKPattern = {
     name: 'InvariantOKPattern',
-    regex: /checking invariant \(\d+\) `(?<context>\w+)::(?<invname>\w+)': OK\.\n/m,
+    regex: /checking invariant \(\d+\) `(?<context>\w+)::(?<invname>\w+)': OK\.\n?/m,
     action: patterns_1.TextPatternAction.ignore,
     variables: ['context', 'invname'],
     replaceFun: function (g) {
@@ -128,7 +130,7 @@ exports.DiscardInvariantCheckingPattern = {
 };
 exports.InvariantsSummaryPattern = {
     name: 'InvariantsSummaryPattern',
-    regex: /^checked [^\n]+\n/,
+    regex: /^checked [^\n]+\n?/,
     variables: [],
     action: patterns_1.TextPatternAction.ignore,
     replaceFun: function (g) {
@@ -157,7 +159,7 @@ exports.MultiplicityViolationPattern = {
 };
 exports.DiscardCheckingStructurePattern = {
     name: 'DiscardCheckingStructurePattern',
-    regex: /checking structure\.\.\.\n|checked structure in \d+ms\.\n/m,
+    regex: /checking structure\.\.\.\n|checked structure in \d+ms\.\n?/m,
     action: patterns_1.TextPatternAction.ignore,
     variables: [],
     replaceFun: function (g) {
@@ -172,7 +174,7 @@ exports.DiscardCheckingStructurePattern = {
  */
 exports.QueryPattern = {
     name: 'QueryPattern',
-    regex: /Detailed results of subexpressions:\n(?<details>(  [^\n]+\n)*)-> (?<result>.*) : (?<resultType>.*)\n/m,
+    regex: /Detailed results of subexpressions:\n(?<details>(  [^\n]+\n)*)-> (?<result>.*) : (?<resultType>.*)\n?/m,
     action: patterns_1.TextPatternAction.replace,
     variables: ['details', 'result', 'resultType'],
     replaceFun: function (g) {

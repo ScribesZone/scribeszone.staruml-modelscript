@@ -5,6 +5,8 @@ import {TextPattern, TextPatternAction} from "../framework/patterns"
 //-------------------------------------------------------------------------
 
 
+// TODO: replaceFun
+
 
 /**
  * Error message localized in a well identified '.use' file.
@@ -35,14 +37,15 @@ export const USEFileIssuePattern: TextPattern = {
  * Example:
  *
  *      <input>:1:0: Variable `Oooops' in expression `Oooops.monday' is undefined.
+ *      <input>:line 1:5 missing EOF at 'is'"
  *
  * Regex:
  *
- *      ^<input>:(?<line>\d+):(?<column>\d+): (?<Type>(Error|Warning): )?(?<message>[^\n]*)\n
+ *      -
  */
 export const SOILLocalizedIssuePattern: TextPattern = {
     name: 'SOILLocalizedIssue',
-    regex: /^<input>:(?<line>\d+):(?<column>\d+): (?<message>[^\n]*)\n/m,
+    regex: /^<input>:(line )?(?<line>\d+):(?<column>\d+):? ?(?<message>[^\n]*)\n?/m,
     action: TextPatternAction.replace,
     variables: ['line', 'column', 'message'],
     replaceFun: function (g) {
@@ -65,7 +68,7 @@ export const SOILLocalizedIssuePattern: TextPattern = {
  */
 export const SOILGlobalIssuePattern: TextPattern = {
     name: 'SOILGlobalIssuePattern',
-    regex: /^(?<kind>(Error|Warning)): (?<message>[^\n]*)\n/m,
+    regex: /^(?<kind>(Error|Warning)): (?<message>[^\n]*)\n?/m,
     action: TextPatternAction.replace,
     variables: ['kind', 'message'],
     replaceFun: function (g) {
@@ -121,7 +124,7 @@ export const InvariantViolationPattern: TextPattern = {
  */
 export const InvariantOKPattern: TextPattern = {
     name: 'InvariantOKPattern',
-    regex: /checking invariant \(\d+\) `(?<context>\w+)::(?<invname>\w+)': OK\.\n/m,
+    regex: /checking invariant \(\d+\) `(?<context>\w+)::(?<invname>\w+)': OK\.\n?/m,
     action: TextPatternAction.ignore,
     variables: ['context', 'invname'],
     replaceFun: function (g) {
@@ -143,7 +146,7 @@ export const DiscardInvariantCheckingPattern: TextPattern = {
 
 export const InvariantsSummaryPattern: TextPattern = {
     name: 'InvariantsSummaryPattern',
-    regex: /^checked [^\n]+\n/,
+    regex: /^checked [^\n]+\n?/,
     variables: [],
     action: TextPatternAction.ignore,
     replaceFun: function (g) {
@@ -179,7 +182,7 @@ export const MultiplicityViolationPattern: TextPattern = {
 
 export const DiscardCheckingStructurePattern: TextPattern = {
     name: 'DiscardCheckingStructurePattern',
-    regex: /checking structure\.\.\.\n|checked structure in \d+ms\.\n/m,
+    regex: /checking structure\.\.\.\n|checked structure in \d+ms\.\n?/m,
     action: TextPatternAction.ignore,
     variables: [],
     replaceFun: function (g) {
@@ -198,7 +201,7 @@ export const DiscardCheckingStructurePattern: TextPattern = {
  */
 export const QueryPattern: TextPattern = {
     name: 'QueryPattern',
-    regex: /Detailed results of subexpressions:\n(?<details>(  [^\n]+\n)*)-> (?<result>.*) : (?<resultType>.*)\n/m,
+    regex: /Detailed results of subexpressions:\n(?<details>(  [^\n]+\n)*)-> (?<result>.*) : (?<resultType>.*)\n?/m,
     action: TextPatternAction.replace,
     variables: ['details', 'result', 'resultType'],
     replaceFun: function (g) {

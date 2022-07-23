@@ -1,4 +1,4 @@
--- state composition__0
+-- begin
                                                                     ?'@@@1'
 ! c1 := new Car
                                                                     ?'@@@2'
@@ -8,3 +8,4 @@
                                                                     ?'@@@4'
 check -v -d
                                                                     ?'@@@5'
+-- end

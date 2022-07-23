@@ -67,7 +67,7 @@ export class TextMatcher {
     readonly originalText: string
     /** Text remaining after all matches have been removed */
     residualText: string
-    readonly replacedMatchesByPatternName: Map<string, Array<TextMatch>>
+    readonly replacedMatchesByPattern: Map<TextPattern, Array<TextMatch>>
     nbOfReplacedMatches: number
     nbOfIgnoredMatches: number
     sections: Set<string>
@@ -78,23 +78,24 @@ export class TextMatcher {
         this.residualText = text
         // console.log('DG:79: residualText', this.residualText)
         // console.log('DG:80: text', text)
-        this.replacedMatchesByPatternName = new Map()
+        this.replacedMatchesByPattern = new Map()
         this.nbOfReplacedMatches = 0
         this.nbOfIgnoredMatches = 0
         this.sections = new Set()
     }
 
     /**
-     *
+     * Return the list of matches corresponding to a pattern.
      */
 
-    matches(patternName: string): Array<TextMatch> {
-        if (this.replacedMatchesByPatternName.has(patternName)) {
-            return this.replacedMatchesByPatternName!.get(patternName)!
+    matches(pattern: TextPattern): Array<TextMatch> {
+        if (this.replacedMatchesByPattern.has(pattern)) {
+            return this.replacedMatchesByPattern!.get(pattern)!
         } else {
             return []
         }
     }
+
     /**
      * Extract from the original text as many pieces of text matching
      * the given pattern and replace each match with the replacement
@@ -102,13 +103,13 @@ export class TextMatcher {
      * toBeIgnored.
      */
     extractPattern(pattern: TextPattern, replacement: string = '') {
-        let match : RegExpExecArray | null
+        let match: RegExpExecArray | null
         const regex = pattern["regex"]
         if (this.debug) {
             console.log(`DG:148: trying pattern ${pattern.name} ${pattern.action}`)
         }
-        while (match = regex.exec(this.residualText) ) {
-            let match_mapping : MatchMapping
+        while (match = regex.exec(this.residualText)) {
+            let match_mapping: MatchMapping
             if (match.groups === undefined) {
                 match_mapping = {}
             } else {
@@ -146,7 +147,7 @@ export class TextMatcher {
     _checkVariables(pattern: TextPattern, mapping: MatchMapping) {
         const actual_variables = Object.keys(mapping)
         const expected_variables = pattern.variables
-        if (! arrayEquals(actual_variables, expected_variables, true)) {
+        if (!arrayEquals(actual_variables, expected_variables, true)) {
             console.error('Error in pattern matching')
             console.error('  expected:', expected_variables)
             console.error('  found:   ', actual_variables)
@@ -156,22 +157,18 @@ export class TextMatcher {
     }
 
     _addToMatches(pattern: TextPattern, mapping: MatchMapping) {
-        const name = pattern.name
         this._checkVariables(pattern, mapping)
         if (pattern.action === TextPatternAction.ignore) {
             // deal with a "ignore" pattern
             this.nbOfIgnoredMatches += 1
         } else {
-            // deal with a "replace" pattern
+            // deal with a "replace" pattern: add it to the registry
             this.nbOfReplacedMatches += 1
-            if (! this.replacedMatchesByPatternName.has(name)) {
-                this.replacedMatchesByPatternName.set(name, [])
+            if (!this.replacedMatchesByPattern.has(pattern)) {
+                this.replacedMatchesByPattern.set(pattern, [])
             }
             const match = new TextMatch(pattern, mapping)
-            this.replacedMatchesByPatternName.get(name)!.push(match)
+            this.replacedMatchesByPattern.get(pattern)!.push(match)
         }
-    }
-
-    getMatches(patternNames = null, summary) {
     }
 }

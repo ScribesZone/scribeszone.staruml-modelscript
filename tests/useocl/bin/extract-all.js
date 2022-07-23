@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var files_1 = require("../../../framework/files");
 var evaluations_1 = require("../../../useocl/evaluations");
-var strings_1 = require("../../../framework/strings");
 // function processSection(filename: string, section: string, index: number, showSection: boolean = false,showMatches: boolean = false, debug: boolean = false) {
 //     if (section === '') {
 //     //     console.log(('... SECTION '+index+ ' IS EMPTY').padEnd(72,'.'))
@@ -66,10 +65,14 @@ var strings_1 = require("../../../framework/strings");
 //     console.log("c'est fini")
 // }
 function processUSEFile(useFilename) {
-    console.log('='.repeat(80));
-    console.log(useFilename);
+    var options = {
+        displaySource: true,
+        displayTrace: true,
+        maxLines: 5
+    };
     var evaluation = new evaluations_1.USEFileEvaluation(useFilename);
-    console.log((0, strings_1.indent)(evaluation.answer.toString()));
+    console.log(evaluation.toString(options));
+    console.log('\n\n');
 }
 function processAllUSEFiles() {
     var targetFiles = (0, files_1.listFiles)('.', '.use');
@@ -78,10 +81,9 @@ function processAllUSEFiles() {
     });
 }
 function processSOILFile(soilFilename) {
-    console.log('='.repeat(80));
-    console.log(soilFilename);
     var evaluation = new evaluations_1.SOILFileEvaluation(soilFilename);
-    // console.log(indent(evaluation.answer.toString()))
+    console.log(evaluation.toString(true, true));
+    console.log('\n\n');
 }
 function processAllSOILFiles() {
     var targetFiles = (0, files_1.listFiles)('.', '.soil');
@@ -89,6 +91,14 @@ function processAllSOILFiles() {
         processSOILFile(filename);
     });
 }
-processAllUSEFiles();
+// processAllUSEFiles()
 processAllSOILFiles();
+// const SOIL_FILES = [
+// //     'composition__0.soil',
+// //     'composition__1.soil',
+//     'composition__warning-2.soil',
+// ]
+// SOIL_FILES.forEach(soil_file => {
+//     processSOILFile(soil_file)
+// })
 //# sourceMappingURL=extract-all.js.map

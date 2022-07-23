@@ -38,17 +38,17 @@ var TextMatcher = /** @class */ (function () {
         this.residualText = text;
         // console.log('DG:79: residualText', this.residualText)
         // console.log('DG:80: text', text)
-        this.replacedMatchesByPatternName = new Map();
+        this.replacedMatchesByPattern = new Map();
         this.nbOfReplacedMatches = 0;
         this.nbOfIgnoredMatches = 0;
         this.sections = new Set();
     }
     /**
-     *
+     * Return the list of matches corresponding to a pattern.
      */
-    TextMatcher.prototype.matches = function (patternName) {
-        if (this.replacedMatchesByPatternName.has(patternName)) {
-            return this.replacedMatchesByPatternName.get(patternName);
+    TextMatcher.prototype.matches = function (pattern) {
+        if (this.replacedMatchesByPattern.has(pattern)) {
+            return this.replacedMatchesByPattern.get(pattern);
         }
         else {
             return [];
@@ -114,24 +114,20 @@ var TextMatcher = /** @class */ (function () {
         }
     };
     TextMatcher.prototype._addToMatches = function (pattern, mapping) {
-        var name = pattern.name;
         this._checkVariables(pattern, mapping);
         if (pattern.action === TextPatternAction.ignore) {
             // deal with a "ignore" pattern
             this.nbOfIgnoredMatches += 1;
         }
         else {
-            // deal with a "replace" pattern
+            // deal with a "replace" pattern: add it to the registry
             this.nbOfReplacedMatches += 1;
-            if (!this.replacedMatchesByPatternName.has(name)) {
-                this.replacedMatchesByPatternName.set(name, []);
+            if (!this.replacedMatchesByPattern.has(pattern)) {
+                this.replacedMatchesByPattern.set(pattern, []);
             }
             var match = new TextMatch(pattern, mapping);
-            this.replacedMatchesByPatternName.get(name).push(match);
+            this.replacedMatchesByPattern.get(pattern).push(match);
         }
-    };
-    TextMatcher.prototype.getMatches = function (patternNames, summary) {
-        if (patternNames === void 0) { patternNames = null; }
     };
     return TextMatcher;
 }());

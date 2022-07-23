@@ -21,6 +21,8 @@ var patterns_2 = require("./patterns");
 var answers_1 = require("./answers");
 var evaluations_1 = require("./evaluations");
 var path = require("path");
+var strings_1 = require("../framework/strings");
+var DEBUG = true;
 var AbstractAnswerParser = /** @class */ (function () {
     function AbstractAnswerParser(text, patterns) {
         this.text = text;
@@ -48,7 +50,7 @@ var AbstractAnswerParser = /** @class */ (function () {
     AbstractAnswerParser.prototype._checkNoResidue = function () {
         if (this.textMatcher.residualText !== '') {
             this.consoleErrorHeader();
-            console.error('Remaining text after pattern matching :');
+            console.error('Remaining text after pattern matching:');
             console.error('"""');
             console.error(this.textMatcher.residualText);
             console.error("\"\"\" length(".concat(this.textMatcher.residualText.length, ")"));
@@ -57,8 +59,10 @@ var AbstractAnswerParser = /** @class */ (function () {
         }
     };
     AbstractAnswerParser.prototype.consoleErrorHeader = function () {
-        console.error('-'.repeat(80));
+        console.error('#'.repeat(80));
         console.error('PARSING ERROR IN CLASS ' + this.constructor.name);
+        console.error('Error occurs while parsing the following text:');
+        console.error('"""' + this.text + '"""');
     };
     AbstractAnswerParser.prototype.throwError = function () {
         throw new Error('===> Parsing error in class ' + this.constructor.name);
@@ -90,7 +94,7 @@ var USEAnswerParser = /** @class */ (function (_super) {
     };
     USEAnswerParser.prototype._addIssues = function () {
         var _this = this;
-        var matches = this.textMatcher.matches("USEFileIssuePattern");
+        var matches = this.textMatcher.matches(patterns_2.USEFileIssuePattern);
         // console.log('DG:73: matches', matches)
         matches.forEach(function (match) {
             var g = match.groups;
@@ -120,7 +124,7 @@ exports.USEAnswerParser = USEAnswerParser;
  * ? ou \ means query,
  * check means check
  * -- means comment
- * otherwise returns null
+ * returns null in case of an unrocognized section
  */
 function kindOfSOILSection(soilText) {
     if (/^\ *!/.exec(soilText)) {
@@ -132,11 +136,15 @@ function kindOfSOILSection(soilText) {
     else if (/^ *check /.exec(soilText)) {
         return evaluations_1.SOILSectionKind.check;
     }
-    else if (/^ *-- /.exec(soilText)) {
+    else if (/^ *--/.exec(soilText)) {
         return evaluations_1.SOILSectionKind.comment;
     }
     else {
         return null;
+        // console.error('ERROR: UNRECOGNIZED SECTION\n"""\n')
+        // console.error(soilText)
+        // console.error('"""\n')
+        // throw new Error('ERROR: SOIL file does not respect the section format')
     }
 }
 exports.kindOfSOILSection = kindOfSOILSection;
@@ -145,6 +153,9 @@ exports.kindOfSOILSection = kindOfSOILSection;
  * @param soilText
  * @param stcText
  */
+// Don't know how to express this in typescript:
+// type SOILAnswerParser = Function
+//      SOILStatementAnswerParser | SOILQueryAnswerParser | SOILCheckAnswerParser
 function getAppropriateSOILParser(soilText) {
     var kind = kindOfSOILSection(soilText);
     if (kind === evaluations_1.SOILSectionKind.statement) {
@@ -160,7 +171,7 @@ function getAppropriateSOILParser(soilText) {
         return null;
     }
     else {
-        return null;
+        throw Error('Unexpected case');
     }
 }
 exports.getAppropriateSOILParser = getAppropriateSOILParser;
@@ -171,7 +182,7 @@ var AbstractSOILAnswerParser = /** @class */ (function (_super) {
     }
     AbstractSOILAnswerParser.prototype._addSOILLocalizedIssue = function () {
         var _this = this;
-        var matches = this.textMatcher.matches("SOILLocalizedIssue");
+        var matches = this.textMatcher.matches(patterns_2.SOILLocalizedIssuePattern);
         // console.log('DG:73: matches', matches)
         matches.forEach(function (match) {
             var g = match.groups;
@@ -182,7 +193,7 @@ var AbstractSOILAnswerParser = /** @class */ (function (_super) {
     };
     AbstractSOILAnswerParser.prototype._addSOILGlobalIssue = function () {
         var _this = this;
-        var matches = this.textMatcher.matches("SOILGlobalIssuePattern");
+        var matches = this.textMatcher.matches(patterns_2.SOILGlobalIssuePattern);
         // console.log('DG:73: matches', matches)
         matches.forEach(function (match) {
             var g = match.groups;
@@ -204,7 +215,7 @@ var SOILStatementAnswerParser = /** @class */ (function (_super) {
         return _super.call(this, stcText, [
             patterns_2.SOILLocalizedIssuePattern,
             patterns_2.SOILGlobalIssuePattern,
-            patterns_2.BlankLinePattern
+            patterns_2.BlankLinePattern // should be at the end of the list
         ]) || this;
     }
     SOILStatementAnswerParser.prototype.analyze = function () {
@@ -221,7 +232,7 @@ var SOILQueryAnswerParser = /** @class */ (function (_super) {
             patterns_2.SOILLocalizedIssuePattern,
             patterns_2.SOILGlobalIssuePattern,
             patterns_2.QueryPattern,
-            patterns_2.BlankLinePattern,
+            patterns_2.BlankLinePattern // should be at the end of the list
         ]) || this;
     }
     SOILQueryAnswerParser.prototype.analyze = function () {
@@ -230,25 +241,38 @@ var SOILQueryAnswerParser = /** @class */ (function (_super) {
         this._addQueryResult();
     };
     SOILQueryAnswerParser.prototype._addQueryResult = function () {
-        var matches = this.textMatcher.matches("QueryPattern");
-        this._checkOneResult(matches);
-        var g = matches[0].groups;
-        var result = new answers_1.QueryResult(g.result, g.resultType, g.details.split('\n'));
-        this.answer.queryResult = result;
-    };
-    SOILQueryAnswerParser.prototype._checkOneResult = function (matches) {
-        if (matches.length === 1) {
-            return;
+        var matches = this.textMatcher.matches(patterns_2.QueryPattern);
+        if (matches.length === 0) {
+            // USE didn't output any result.
+            // Just to be safe, check that this is due to some error.
+            if (this.answer.hasIssues()) {
+                // There is no result, but some USE issues. This is ok.
+                // No queryResult => null
+                this.answer.queryResult = null;
+            }
+            else {
+                // No USE issues. Then there is probably something strange
+                // in the parser.
+                this.consoleErrorHeader();
+                console.error('ERROR WHEN PARSING QUERY ANSWER:');
+                console.error('    (1) USE emit no issues');
+                console.error('    (2) No query result can be matched');
+                console.error('    This is strange.');
+                this.throwError();
+            }
         }
-        else if (matches.length <= 1) {
+        else if (matches.length >= 2) {
             this.consoleErrorHeader();
-            console.error('Query result expected. No match found.');
+            console.error('ERROR: More than one results for one query!');
             this.throwError();
         }
         else {
-            this.consoleErrorHeader();
-            console.error('More than one results for one query!');
-            this.throwError();
+            var g = matches[0].groups;
+            var lines = ((0, strings_1.ensureNoNewLineAtEnd)(g.details)
+                .split('\n')
+                .map(function (l) { return l.trim(); }));
+            var result = new answers_1.QueryResult(g.result, g.resultType, lines);
+            this.answer.queryResult = result;
         }
     };
     return SOILQueryAnswerParser;
@@ -277,16 +301,20 @@ var SOILCheckAnswerParser = /** @class */ (function (_super) {
     };
     SOILCheckAnswerParser.prototype._addInvariantViolations = function () {
         var _this = this;
-        var matches = this.textMatcher.matches("InvariantViolationPattern");
+        var matches = this.textMatcher.matches(patterns_2.InvariantViolationPattern);
         matches.forEach(function (match) {
+            var _a;
             var g = match.groups;
-            var iv = new answers_1.InvariantViolation(g.context, g.invname, g.objects.split(','), g.details.split('\n').map(function (line) { return line.trim(); }));
+            var detail_lines = ((0, strings_1.ensureNoNewLineAtEnd)(((_a = g.details) !== null && _a !== void 0 ? _a : ''))
+                .split('\n')
+                .map(function (l) { return l.trim(); }));
+            var iv = new answers_1.InvariantViolation(g.context, g.invname, g.objects.split(','), detail_lines);
             _this.answer.invariantViolations.push(iv);
         });
     };
     SOILCheckAnswerParser.prototype._addMultiplicityViolations = function () {
         var _this = this;
-        var matches = this.textMatcher.matches("MultiplicityViolationPattern");
+        var matches = this.textMatcher.matches(patterns_2.MultiplicityViolationPattern);
         matches.forEach(function (match) {
             var g = match.groups;
             var mv = new answers_1.MultiplicityViolation(g.sourceClass, g.targetRole, g.targetClass, g.object, parseInt(g.numberOfObjects), g.cardinality);

@@ -4,12 +4,22 @@
 
 import {TextMatcher, TextPattern} from "../framework/patterns"
 import {BlankLinePattern, USEFileIssuePattern} from "./patterns"
-import {indent} from "../framework/strings";
+import {
+    indent,
+    NoLineString,
+    MultilineString,
+    isNoLineString,
+    isMultilineString, ensureNoNewLineAtEnd, LineEndedString, isLineEnded
+} from "../framework/strings"
 
-function subExpressionsToString(label:string, subExpressions: Array<String>): string {
-    return `[${subExpressions.length} ${label}]`
+import assert = require("node:assert")
+
+
+function subExpressionsToString(label:string, subExpressions: Array<String>): NoLineString {
+    let r = `[${subExpressions.length} ${label}]`
+    assert(isNoLineString(r))
+    return r
 }
-
 
 
 export abstract class AbstractAnswer {
@@ -22,36 +32,70 @@ export class USEFileIssue {
         public readonly message: string
     ) {}
 
-    toString() {
-        return `ISSUE: ${this.line}:${this.column}:${this.message}`
+    toString(): NoLineString {
+        let r = `ISSUE: ${this.line}:${this.column}:${this.message}`
+        assert(isNoLineString(r))
+        return r
     }
 }
+
+
+
+
+
+//=========================================================================
+//  USE answers
+//=========================================================================
 
 export class USEAnswer {
     constructor(
         public readonly issues: Array<USEFileIssue> = []
     ) {}
 
-    toString(): string {
-        return 'ANSWER: \n'+indent(this.issues.map(i=>i.toString()).join('\n'))
+    hasIssues() {
+        return this.issues.length >= 1
+    }
+
+    toString(): LineEndedString {
+        let r
+        if (this.issues.length === 0) {
+            r = 'ANSWER: -\n'
+        } else {
+            r = (
+                'ANSWER:\n'
+                + indent(this.issues.map(i => i.toString()).join('\n')) + ' \n')
+        }
+        assert(isLineEnded(r))
+        return r
     }
 }
 
 //=========================================================================
 //  SOIL answers
-//=========================================================================-
+//=========================================================================
 
 export abstract class SOILAnswer {
-    constructor (
+
+    protected constructor (
         public readonly localizedIssues: Array<SOILLocalizedIssue> = [],
         public readonly globalIssues: Array<SOILGlobalIssue> = []
     ) {}
 
-    toString(): string {
-        return (
-            'ANSWER: \n'
-            + indent(this.localizedIssues.map(i=>i.toString()).join('\n'))
-            + indent(this.globalIssues.map(i=>i.toString()).join('\n')))
+    hasIssues() {
+        return (this.localizedIssues.length > 0) || (this.globalIssues.length > 0)
+    }
+
+    toString(): LineEndedString {
+        let r = 'ANSWER:\n'
+        if (this.localizedIssues.length >= 1) {
+            r += indent(this.localizedIssues.map(i=>i.toString()).join('\n')) +'\n'
+        }
+        if (this.globalIssues.length >= 1) {
+            r += indent(this.globalIssues.map(i=>i.toString()).join('\n')) +'\n'
+        }
+        console.error('"""'+r+'"""')
+        assert(isLineEnded(r))
+        return r
     }
 }
 
@@ -66,8 +110,10 @@ export class SOILLocalizedIssue {
         public readonly message: string
     ) {}
 
-    toString(): string {
-        return `ISSUE: ${this.line}:${this.column}:${this.message}`
+    toString(): NoLineString {
+        let r = `ISSUE: ${this.line}:${this.column}:${this.message}`
+        assert(isNoLineString(r))
+        return r
     }
 }
 
@@ -75,13 +121,16 @@ export type SOILIssueKind = 'Error' | 'Warning'
 
 
 export class SOILGlobalIssue {
+
     constructor(
         public readonly kind: SOILIssueKind,
         public readonly message: string
     ) {}
 
-    toString(): string {
-        return `ISSUE: '-':'-':${this.kind}:${this.message}`
+    toString(): NoLineString {
+        let r = `ISSUE: '-':'-':${this.kind}:${this.message}`
+        assert(isNoLineString(r))
+        return r
     }
 
 }
@@ -89,11 +138,8 @@ export class SOILGlobalIssue {
 //-------------------------------------------------------------------------
 //  Statements answer
 //-------------------------------------------------------------------------
-//
 
-/**
- * Answer to statements.
- */
+
 export class SOILStatementAnswer extends SOILAnswer {
     constructor(
         public readonly localizedIssues: Array<SOILLocalizedIssue> = [],
@@ -101,19 +147,22 @@ export class SOILStatementAnswer extends SOILAnswer {
         super(localizedIssues, globalIssues)
     }
 
-    toString(): string {
-        return (
-            'ANSWER:\n'
-            + indent(super.toString()))
+    toString(): LineEndedString {
+        let r = super.toString()
+        assert(isLineEnded(r))
+        return r
     }
 }
-
 
 //-------------------------------------------------------------------------
 // Query result
 //-------------------------------------------------------------------------
 
-
+/**
+ * Result of a query. If errors are generated during the evaluation
+ * then instead of having a QueryResult, a  null value means no query result.
+ * The class below represents the case where there is a result.
+ */
 export class QueryResult {
 
     constructor(
@@ -122,10 +171,13 @@ export class QueryResult {
         public readonly subExpressions: Array<string>
     ) {}
 
-    toString(): string {
-        return (
-            `RESULT: ${this.result}: ${this.resultType}`
-            + subExpressionsToString('subExprs', this.subExpressions))
+    toString(): LineEndedString {
+        let r = `RESULT: ${this.result}: ${this.resultType}` + '\n'
+        r += indent(this.subExpressions.join('\n')) + '\n'
+        // r += ensureNoNewLineAtEnd(this.subExpressions ?? '').split('\n').map(line => line.trim()) +'\n'
+        // r += subExpressionsToString('subExprs', this.subExpressions)
+        assert(isLineEnded(r))
+        return r
     }
 }
 
@@ -137,15 +189,23 @@ export class SOILQueryAnswer extends SOILAnswer {
     constructor(
         public readonly localizedIssues: Array<SOILLocalizedIssue> = [],
         public readonly globalIssues: Array<SOILGlobalIssue> = [],
-        public queryResult: QueryResult | null = null) {  // null only at parse time
+        /**
+         * Result of the query. null means that an error occured in the use evaluation.
+         * For instance if the query is malformed.
+         */
+        public queryResult: QueryResult | null = null) {
         super(localizedIssues, globalIssues)
     }
 
     toString(): string {
-        return (
-            'ANSWER:\n'
-            + indent(super.toString())
-            + indent(this.queryResult!.toString()))
+        let r = super.toString()
+        const query_result_text = (
+            (this.queryResult === null)
+                ? 'RESULT: none\n'
+                : this.queryResult.toString()  )
+        r += indent(query_result_text))
+        assert(isLineEnded(r))
+        return r
     }
 }
 
@@ -161,13 +221,14 @@ export class InvariantViolation {
         public readonly subExpressions: Array<string>
     ) {}
 
-    toString() {
-        return (
-            'INVARIANT VIOLATION:'
+    toString(): LineEndedString {
+        let r = (
+            'INVARIANT VIOLATION: '
             + this.className + '.' + this.invariantName
-            + ' (' + this.faultyObjects.join(',') + ') '
-            + subExpressionsToString('subExprs', this.subExpressions)
-        )
+            + ' (' + this.faultyObjects.join(',') + ') ')
+        r += indent(this.subExpressions.join('\n')) + '\n'
+        assert(isLineEnded(r))
+        return r
     }
 }
 
@@ -182,12 +243,14 @@ export class MultiplicityViolation {
         public readonly cardinality: string
     ) {}
 
-    toString() {
-        return (
+    toString(): LineEndedString {
+        const r = (
             'MULTIPLICITY VIOLATION: '
             + `card(${this.object}.${this.targetRole})=${this.numberOfObjects}`
-            + ` but card(${this.sourceClass}).${this.targetRole}=${this.cardinality}`
+            + ` but card(${this.sourceClass}).${this.targetRole}=${this.cardinality}\n`
         )
+        assert(isLineEnded(r))
+        return r
     }
 }
 
@@ -204,5 +267,17 @@ export class SOILCheckAnswer extends SOILAnswer {
         super(localizedIssues, globalIssues)
     }
 
+    toString(): LineEndedString {
+        let r = super.toString()
+        if (this.multiplicityViolations.length >= 1) {
+            r += indent(this.multiplicityViolations.map(v => v.toString()).join('\n'))
+        }
+        if (this.invariantViolations.length >= 1) {
+            r += indent(this.invariantViolations.map(v => v.toString()).join('\n'))
+        }
+        console.error('"""'+r+'"""')
+        assert(isLineEnded(r))
+        return r
+    }
 }
 

@@ -1,3 +1,4 @@
+--
                                                                     ?'@@@1'
 ! x := new Employee('sophie')
                                                                     ?'@@@2'
@@ -7,3 +8,4 @@ check -v -d -a
                                                                     ?'@@@4'
 check -d -a
                                                                     ?'@@@5'
+--

@@ -26,7 +26,9 @@ import {
     SOILSectionKind
 } from "./evaluations"
 import * as path from "path";
+import {ensureNoNewLineAtEnd, indent} from "../framework/strings";
 
+const DEBUG = true
 
 abstract class AbstractAnswerParser {
     readonly text: string
@@ -68,7 +70,7 @@ abstract class AbstractAnswerParser {
     private _checkNoResidue(): void {
         if (this.textMatcher.residualText !== '') {
             this.consoleErrorHeader()
-            console.error('Remaining text after pattern matching :')
+            console.error('Remaining text after pattern matching:')
             console.error('"""')
             console.error(this.textMatcher.residualText)
             console.error(`""" length(${this.textMatcher.residualText.length})`)
@@ -78,14 +80,19 @@ abstract class AbstractAnswerParser {
     }
 
     protected consoleErrorHeader() {
-        console.error('-'.repeat(80))
+        console.error('#'.repeat(80))
         console.error('PARSING ERROR IN CLASS ' + this.constructor.name)
+        console.error('Error occurs while parsing the following text:')
+        console.error('"""'+this.text+'"""')
     }
 
     protected throwError() {
         throw new Error('===> Parsing error in class '+ this.constructor.name)
     }
 }
+
+
+
 
 
 
@@ -118,7 +125,7 @@ export class USEAnswerParser extends AbstractAnswerParser {
     }
 
     _addIssues() {
-        const matches = this.textMatcher.matches("USEFileIssuePattern")
+        const matches = this.textMatcher.matches(USEFileIssuePattern)
         // console.log('DG:73: matches', matches)
         matches.forEach(match => {
             const g = match.groups
@@ -160,7 +167,7 @@ export class USEAnswerParser extends AbstractAnswerParser {
  * ? ou \ means query,
  * check means check
  * -- means comment
- * otherwise returns null
+ * returns null in case of an unrocognized section
  */
 export function kindOfSOILSection(soilText: string): SOILSectionKind | null {
     if (/^\ *!/.exec(soilText)) {
@@ -169,10 +176,14 @@ export function kindOfSOILSection(soilText: string): SOILSectionKind | null {
         return SOILSectionKind.query
     } else if (/^ *check /.exec(soilText)) {
         return SOILSectionKind.check
-    } else if (/^ *-- /.exec(soilText)) {
+    } else if (/^ *--/.exec(soilText)) {
         return SOILSectionKind.comment
     } else {
-        return  null
+        return null
+        // console.error('ERROR: UNRECOGNIZED SECTION\n"""\n')
+        // console.error(soilText)
+        // console.error('"""\n')
+        // throw new Error('ERROR: SOIL file does not respect the section format')
     }
 }
 
@@ -181,7 +192,12 @@ export function kindOfSOILSection(soilText: string): SOILSectionKind | null {
  * @param soilText
  * @param stcText
  */
-export function getAppropriateSOILParser(soilText: string) //: class | null
+
+// Don't know how to express this in typescript:
+// type SOILAnswerParser = Function
+//      SOILStatementAnswerParser | SOILQueryAnswerParser | SOILCheckAnswerParser
+
+export function getAppropriateSOILParser(soilText: string)// : SOILAnswerParser | null
 {
     const kind = kindOfSOILSection(soilText)
     if (kind === SOILSectionKind.statement) {
@@ -193,7 +209,7 @@ export function getAppropriateSOILParser(soilText: string) //: class | null
     } else if (kind === SOILSectionKind.comment) {
         return null
     } else {
-        return null
+        throw Error('Unexpected case')
     }
 }
 
@@ -201,7 +217,7 @@ export function getAppropriateSOILParser(soilText: string) //: class | null
 export abstract class AbstractSOILAnswerParser extends AbstractAnswerParser {
 
     _addSOILLocalizedIssue() {
-        const matches = this.textMatcher.matches("SOILLocalizedIssue")
+        const matches = this.textMatcher.matches(SOILLocalizedIssuePattern)
         // console.log('DG:73: matches', matches)
         matches.forEach(match => {
             const g = match.groups
@@ -215,7 +231,7 @@ export abstract class AbstractSOILAnswerParser extends AbstractAnswerParser {
     }
 
     _addSOILGlobalIssue() {
-        const matches = this.textMatcher.matches("SOILGlobalIssuePattern")
+        const matches = this.textMatcher.matches(SOILGlobalIssuePattern)
         // console.log('DG:73: matches', matches)
         matches.forEach(match => {
             const g = match.groups
@@ -242,7 +258,7 @@ export class SOILStatementAnswerParser extends AbstractSOILAnswerParser {
         super(stcText, [
             SOILLocalizedIssuePattern,
             SOILGlobalIssuePattern,
-            BlankLinePattern
+            BlankLinePattern  // should be at the end of the list
         ])
     }
 
@@ -261,7 +277,7 @@ export class SOILQueryAnswerParser extends AbstractSOILAnswerParser {
             SOILLocalizedIssuePattern,
             SOILGlobalIssuePattern,
             QueryPattern,
-            BlankLinePattern,
+            BlankLinePattern // should be at the end of the list
         ])
     }
 
@@ -272,28 +288,40 @@ export class SOILQueryAnswerParser extends AbstractSOILAnswerParser {
     }
 
     private _addQueryResult() {
-        const matches = this.textMatcher.matches("QueryPattern")
-        this._checkOneResult(matches)
-        const g = matches[0].groups
-        const result = new QueryResult(
-            g.result,
-            g.resultType,
-            g.details.split('\n')
-        )
-        this.answer.queryResult = result
-    }
-
-    private _checkOneResult(matches) {
-        if (matches.length === 1) {
-            return
-        } else if (matches.length <= 1) {
+        const matches = this.textMatcher.matches(QueryPattern)
+        if (matches.length === 0) {
+            // USE didn't output any result.
+            // Just to be safe, check that this is due to some error.
+            if (this.answer.hasIssues()) {
+                // There is no result, but some USE issues. This is ok.
+                // No queryResult => null
+                this.answer.queryResult = null
+            } else {
+                // No USE issues. Then there is probably something strange
+                // in the parser.
+                this.consoleErrorHeader()
+                console.error('ERROR WHEN PARSING QUERY ANSWER:')
+                console.error('    (1) USE emit no issues')
+                console.error('    (2) No query result can be matched')
+                console.error('    This is strange.')
+                this.throwError()
+            }
+        } else if (matches.length >= 2) {
             this.consoleErrorHeader()
-            console.error('Query result expected. No match found.')
+            console.error('ERROR: More than one results for one query!')
             this.throwError()
         } else {
-            this.consoleErrorHeader()
-            console.error('More than one results for one query!')
-            this.throwError()
+            const g = matches[0].groups
+            const lines: Array<string> = (
+                ensureNoNewLineAtEnd(g.details)
+                    .split('\n')
+                .map(l => l.trim()))
+            const result = new QueryResult(
+                g.result,
+                g.resultType,
+                lines
+            )
+            this.answer.queryResult = result
         }
     }
 }
@@ -324,21 +352,25 @@ export class SOILCheckAnswerParser extends AbstractSOILAnswerParser {
     }
 
     private _addInvariantViolations() {
-        const matches = this.textMatcher.matches("InvariantViolationPattern")
+        const matches = this.textMatcher.matches(InvariantViolationPattern)
         matches.forEach(match => {
             const g = match.groups
+            const detail_lines = (
+                ensureNoNewLineAtEnd((g.details ?? ''))
+                    .split('\n')
+                    .map(l => l.trim()))
             const iv = new InvariantViolation(
                 g.context,
                 g.invname,
                 g.objects.split(','),
-                g.details.split('\n').map(line => line.trim())
+                detail_lines
             )
             this.answer.invariantViolations.push(iv)
         })
     }
 
     private _addMultiplicityViolations() {
-        const matches = this.textMatcher.matches("MultiplicityViolationPattern")
+        const matches = this.textMatcher.matches(MultiplicityViolationPattern)
         matches.forEach(match => {
             const g = match.groups
             const mv = new MultiplicityViolation(

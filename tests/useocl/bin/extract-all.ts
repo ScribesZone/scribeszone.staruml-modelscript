@@ -4,10 +4,9 @@ import * as assert from "assert";
 import {listFiles} from "../../../framework/files"
 import {
     USEFileEvaluation,
-    SOILFileEvaluation
+    SOILFileEvaluation, DisplayOptions
 } from "../../../useocl/evaluations";
 import {indent} from "../../../framework/strings";
-
 
 // function processSection(filename: string, section: string, index: number, showSection: boolean = false,showMatches: boolean = false, debug: boolean = false) {
 //     if (section === '') {
@@ -74,10 +73,14 @@ import {indent} from "../../../framework/strings";
 // }
 
 function processUSEFile(useFilename: string) {
-    console.log('='.repeat(80))
-    console.log(useFilename)
+    const options: DisplayOptions = {
+        displaySource: true,
+        displayTrace: true,
+        maxLines: 5
+    }
     const evaluation = new USEFileEvaluation(useFilename)
-    console.log(indent(evaluation.answer.toString()))
+    console.log(evaluation.toString(options))
+    console.log('\n\n')
 }
 
 function processAllUSEFiles() {
@@ -90,10 +93,9 @@ function processAllUSEFiles() {
 
 
 function processSOILFile(soilFilename: string) {
-    console.log('='.repeat(80))
-    console.log(soilFilename)
     const evaluation = new SOILFileEvaluation(soilFilename)
-    // console.log(indent(evaluation.answer.toString()))
+    console.log(evaluation.toString(true, true))
+    console.log('\n\n')
 }
 
 function processAllSOILFiles() {
@@ -103,5 +105,13 @@ function processAllSOILFiles() {
     })
 }
 
-processAllUSEFiles()
+// processAllUSEFiles()
 processAllSOILFiles()
+// const SOIL_FILES = [
+// //     'composition__0.soil',
+// //     'composition__1.soil',
+//     'composition__warning-2.soil',
+// ]
+// SOIL_FILES.forEach(soil_file => {
+//     processSOILFile(soil_file)
+// })
