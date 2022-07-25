@@ -75,7 +75,7 @@ export type MultilineString = string
 export type NoLineEndedString = string
 
 /**
- * A string with '\n' at the end. Check with is LineEnded().
+ * A string with '\n' at the end. To be checked with is LineEnded().
  */
 export type LineEndedString = string
 
