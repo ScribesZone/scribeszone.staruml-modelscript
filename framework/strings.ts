@@ -77,7 +77,6 @@ export type NoLineEndedString = string
 /**
  * A string with '\n' at the end. To be checked with is LineEnded().
  */
-
 export type LineEndedString = string
 
 function isMultilineString(text: string): boolean {
