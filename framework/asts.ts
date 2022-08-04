@@ -11,8 +11,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import * as staruml from './staruml'
+// declare var staruml : any
 
-import { ensureDirectory } from "./misc"
+import { ensureDirectory } from "./files"
 import { TracedErrorReporter } from './traces'
 import { asString } from "./models"
 import { AbstractGenerator } from "./generators"

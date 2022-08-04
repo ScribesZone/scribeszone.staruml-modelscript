@@ -79,7 +79,7 @@ export type NoLineEndedString = string
  */
 export type LineEndedString = string
 
-function isMultilineString(text: string): boolean {
+export function isMultilineString(text: string): boolean {
     return text.indexOf('\n') !== -1
 }
 

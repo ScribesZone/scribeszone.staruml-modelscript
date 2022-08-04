@@ -23,7 +23,8 @@ exports.ASTCollection = exports.AST = exports.Line = exports.Token = exports.lin
 var JAVASCRIPT_FILE_TO_TRACE = 'generator.js';
 var fs = require("fs");
 var path = require("path");
-var misc_1 = require("./misc");
+// declare var staruml : any
+var files_1 = require("./files");
 var traces_1 = require("./traces");
 var models_1 = require("./models");
 // This should be improved with typescript enumerations or something else
@@ -250,7 +251,7 @@ var AST = /** @class */ (function () {
         }
         var parent_directory = path.dirname(this.filename);
         try {
-            (0, misc_1.ensureDirectory)(parent_directory);
+            (0, files_1.ensureDirectory)(parent_directory);
         }
         catch (error) {
             var message = ("Fail to create parent directory "

@@ -2,14 +2,15 @@
 //  USE answer
 //=========================================================================-
 
-import {TextMatcher, TextPattern} from "../framework/patterns"
-import {BlankLinePattern, USEFileIssuePattern} from "./patterns"
+// import {TextMatcher, TextPattern} from "../framework/patterns"
+// import {BlankLinePattern, USEFileIssuePattern} from "./patterns"
 import {
     indent,
     NoLineString,
-    MultilineString,
+    // MultilineString,
     isNoLineString,
-    isMultilineString, ensureNoNewLineAtEnd, LineEndedString, isLineEnded
+    // isMultilineString, ensureNoNewLineAtEnd,
+    LineEndedString, isLineEnded
 } from "../framework/strings"
 
 import assert = require("node:assert")
@@ -86,14 +87,14 @@ export abstract class SOILAnswer {
     }
 
     toString(): LineEndedString {
-        let r = 'ANSWER:\n'
+        let r =''
         if (this.localizedIssues.length >= 1) {
             r += indent(this.localizedIssues.map(i=>i.toString()).join('\n')) +'\n'
         }
         if (this.globalIssues.length >= 1) {
             r += indent(this.globalIssues.map(i=>i.toString()).join('\n')) +'\n'
         }
-        console.error('"""'+r+'"""')
+        console.error('ANSWER:\n"""'+r+'"""')
         assert(isLineEnded(r))
         return r
     }
@@ -203,7 +204,7 @@ export class SOILQueryAnswer extends SOILAnswer {
             (this.queryResult === null)
                 ? 'RESULT: none\n'
                 : this.queryResult.toString()  )
-        r += indent(query_result_text))
+        r += indent(query_result_text)
         assert(isLineEnded(r))
         return r
     }

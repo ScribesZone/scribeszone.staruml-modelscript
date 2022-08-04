@@ -3,7 +3,7 @@
 //     Strings
 //-------------------------------------------------------------------------
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ensureNoNewLineAtEnd = exports.isLineEnded = exports.isNoLineEnded = exports.isNoLineString = exports.ensureNewLineAtEnd = exports.limitMultilineString = exports.limit = exports.onOneLine = exports.indent = void 0;
+exports.ensureNoNewLineAtEnd = exports.isLineEnded = exports.isNoLineEnded = exports.isNoLineString = exports.isMultilineString = exports.ensureNewLineAtEnd = exports.limitMultilineString = exports.limit = exports.onOneLine = exports.indent = void 0;
 var assert = require("assert");
 /**
  * Add a margin before all lines
@@ -66,6 +66,7 @@ exports.ensureNewLineAtEnd = ensureNewLineAtEnd;
 function isMultilineString(text) {
     return text.indexOf('\n') !== -1;
 }
+exports.isMultilineString = isMultilineString;
 function isNoLineString(text) {
     return !isMultilineString(text);
 }

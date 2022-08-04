@@ -19,6 +19,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SOILCheckAnswer = exports.MultiplicityViolation = exports.InvariantViolation = exports.SOILQueryAnswer = exports.QueryResult = exports.SOILStatementAnswer = exports.SOILGlobalIssue = exports.SOILLocalizedIssue = exports.SOILAnswer = exports.USEAnswer = exports.USEFileIssue = exports.AbstractAnswer = void 0;
+// import {TextMatcher, TextPattern} from "../framework/patterns"
+// import {BlankLinePattern, USEFileIssuePattern} from "./patterns"
 var strings_1 = require("../framework/strings");
 var assert = require("node:assert");
 function subExpressionsToString(label, subExpressions) {
@@ -86,14 +88,14 @@ var SOILAnswer = /** @class */ (function () {
         return (this.localizedIssues.length > 0) || (this.globalIssues.length > 0);
     };
     SOILAnswer.prototype.toString = function () {
-        var r = 'ANSWER:\n';
+        var r = '';
         if (this.localizedIssues.length >= 1) {
             r += (0, strings_1.indent)(this.localizedIssues.map(function (i) { return i.toString(); }).join('\n')) + '\n';
         }
         if (this.globalIssues.length >= 1) {
             r += (0, strings_1.indent)(this.globalIssues.map(function (i) { return i.toString(); }).join('\n')) + '\n';
         }
-        console.error('"""' + r + '"""');
+        console.error('ANSWER:\n"""' + r + '"""');
         assert((0, strings_1.isLineEnded)(r));
         return r;
     };
