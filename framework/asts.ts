@@ -1,5 +1,8 @@
 // noinspection UnnecessaryLocalVariableJS
 
+/// <reference path="../../staruml-cli-examples/staruml/types/index.d.ts" />
+/// <reference path="../../staruml-cli-examples/staruml/api.d.ts" />
+
 /**
  * The file that is known by the generator developer.
  */
@@ -94,13 +97,13 @@ export class Token {
     public readonly line: Line
     public readonly text: string
     public readonly category: Category
-    public readonly element: staruml.Model | null
+    public readonly element: type.Model | null
 
     constructor(
         line : Line,
         text: string,
         category: Category = "default",
-        element : staruml.Model | null = null) {
+        element : type.Model | null = null) {
 
         this.line = line
         if (text.split('\n').length >= 2) {
@@ -215,7 +218,7 @@ export class AST {  // TODO: add EventEmitter
     public readonly filename: string
     public readonly label: string  // something like class model or lea state model
     public readonly role: string
-    public readonly elements: Array<staruml.Model>
+    public readonly elements: Array<type.Model>
     public readonly lines: Array<Line>
     public isOpen: boolean
 
@@ -226,7 +229,7 @@ export class AST {  // TODO: add EventEmitter
                  filename: string,
                  label: string = "",
                  role: string = "main",
-                 elements: Array<staruml.Model> = [],
+                 elements: Array<type.Model> = [],
                  debug: boolean= false,
                  eventFns = {}) {  // TODO: replace eventFns by
         console.assert(
@@ -276,7 +279,7 @@ export class AST {  // TODO: add EventEmitter
     write(
         text: string,
         category: Category = "default",
-        element: staruml.Model | null = null
+        element: type.Model | null = null
     ) {
         this._checkIsOpen()
         if (text.split('\n').length >= 2) {
@@ -321,7 +324,7 @@ export class AST {  // TODO: add EventEmitter
     writeln(
         text?: string,
         category: Category = "default",
-        element: staruml.Model | null = null
+        element: type.Model | null = null
     ) {
         if (text !== undefined) {
             this.write(text, category, element)
@@ -450,7 +453,7 @@ export class ASTCollection {
         filename: string,
         label: string = '',
         role: string = 'main',
-        elements: Array<staruml.Model> = []
+        elements: Array<type.Model> = []
     ): AST {
         console.assert(
             elements.every( element => element instanceof type.Model),

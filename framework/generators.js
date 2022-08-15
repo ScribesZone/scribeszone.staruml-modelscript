@@ -1,4 +1,9 @@
 "use strict";
+/// <reference path="../../staruml-cli-examples/staruml/types/index.d.ts" />
+/// <reference path="../../staruml-cli-examples/staruml/api.d.ts" />
+// 
+// declare var type : any
+// declare var app : any
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractGenerator = exports.getProjectBasedFilename = exports.GeneratorStatus = void 0;
 var path = require("path");
@@ -16,7 +21,7 @@ var GeneratorStatus;
 /**
  * Helper to compute easily output file base on
  * project file using its path and basename
- * (for instance /h/zarwinn/proj.mdj
+ * (for instance /h/zarwinn/proj.mdj)
  *
  * @param extension extension of the generated file.
  * @param relativeDirectory directory where the file as to be saved.
@@ -26,8 +31,8 @@ var GeneratorStatus;
  * "." so by default the output file will be in the same
  * directory.
  *
- * If set basename is the name of the output file.
- * Otherwise the basename of the project is used.
+ * If set basename is the name of the output file,
+ * otherwise the basename of the project is used.
  *
  * With projectFile being the path given above and f
  * this function :
@@ -72,7 +77,7 @@ var AbstractGenerator = /** @class */ (function () {
      * Check a precondition for the doGenerate function to run.
      * A particular generator could check for instance that
      * given staruml elements of a proper type are selected.
-     * By default there is no precondition.
+     * By default, there is no precondition.
      *
      * Return true if the precondition is fulfilled otherwise
      * return as a string an error message.
@@ -137,7 +142,7 @@ var AbstractGenerator = /** @class */ (function () {
     };
     //---------------------------------------------------------------------
     // methods wrapping AST and ASTCollection
-    // Provided from developer convenience. These methods calls
+    // Provided from developer convenience. These methods call
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
     // public getPlainText(): string {

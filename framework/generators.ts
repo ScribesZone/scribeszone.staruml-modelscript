@@ -1,5 +1,10 @@
-declare var type : any
-declare var app : any
+/// <reference path="../../staruml-cli-examples/staruml/types/index.d.ts" />
+/// <reference path="../../staruml-cli-examples/staruml/api.d.ts" />
+// 
+// declare var type : any
+// declare var app : any
+
+
 
 import * as path from "path"
 
@@ -27,7 +32,7 @@ export enum GeneratorStatus {
 /**
  * Helper to compute easily output file base on
  * project file using its path and basename
- * (for instance /h/zarwinn/proj.mdj
+ * (for instance /h/zarwinn/proj.mdj)
  *
  * @param extension extension of the generated file.
  * @param relativeDirectory directory where the file as to be saved.
@@ -37,8 +42,8 @@ export enum GeneratorStatus {
  * "." so by default the output file will be in the same
  * directory.
  *
- * If set basename is the name of the output file.
- * Otherwise the basename of the project is used.
+ * If set basename is the name of the output file,
+ * otherwise the basename of the project is used.
  *
  * With projectFile being the path given above and f
  * this function :
@@ -110,7 +115,7 @@ export abstract class AbstractGenerator {
      * Check a precondition for the doGenerate function to run.
      * A particular generator could check for instance that
      * given staruml elements of a proper type are selected.
-     * By default there is no precondition.
+     * By default, there is no precondition.
      *
      * Return true if the precondition is fulfilled otherwise
      * return as a string an error message.
@@ -142,7 +147,7 @@ export abstract class AbstractGenerator {
         filename: string,
         label: string = "",
         role: string = "main",
-        elements: Array<staruml.Element> = []
+        elements: Array<type.Element> = []
     ) : AST  {
         console.assert(
             elements.every( element => element instanceof type.Model),
@@ -171,7 +176,7 @@ export abstract class AbstractGenerator {
     protected write(
         text: string,
         category: Category = "default",
-        element: staruml.Model | null = null
+        element: type.Model | null = null
     ): void {
         this.checkCurrentAST()
         this.astCollection.currentAST!.write(text, category, element)
@@ -180,7 +185,7 @@ export abstract class AbstractGenerator {
     protected writeln(
         text?: string,
         category: Category = "default",
-        element: staruml.Model | null = null
+        element: type.Model | null = null
     ): void {
         this.checkCurrentAST()
         this.astCollection.currentAST!.writeln(text, category, element)
@@ -188,7 +193,7 @@ export abstract class AbstractGenerator {
 
     protected writeIdentifier(
         text: string,
-        element : staruml.Model | null = null
+        element : type.Model | null = null
     ): void {
         this.checkCurrentAST()
         this.astCollection.currentAST!.write(text, 'identifier1', element)
@@ -214,7 +219,7 @@ export abstract class AbstractGenerator {
 
     //---------------------------------------------------------------------
     // methods wrapping AST and ASTCollection
-    // Provided from developer convenience. These methods calls
+    // Provided from developer convenience. These methods call
     // astCollection or currentAST methods.
     //---------------------------------------------------------------------
 

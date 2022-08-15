@@ -17,6 +17,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ASTCollection = exports.AST = exports.Line = exports.Token = exports.lineNumberPrefix = exports.ASTTracedErrorReporter = exports.IDENTIFIER_CATEGORIES = void 0;
+/// <reference path="../../staruml-cli-examples/staruml/types/index.d.ts" />
+/// <reference path="../../staruml-cli-examples/staruml/api.d.ts" />
 /**
  * The file that is known by the generator developer.
  */
