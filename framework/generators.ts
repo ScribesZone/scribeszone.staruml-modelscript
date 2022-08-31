@@ -19,7 +19,6 @@ import {
 import { TracedError } from "./traces"
 import { asString } from "./models"
 
-
 export enum GeneratorStatus {
     UNDEFINED = "undefined",
     OK = "ok",
