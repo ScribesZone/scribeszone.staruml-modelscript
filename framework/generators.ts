@@ -5,7 +5,6 @@
 // declare var app : any
 
 
-
 import * as path from "path"
 
 import * as staruml from './staruml'
