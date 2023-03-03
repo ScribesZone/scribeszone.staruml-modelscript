@@ -17,14 +17,14 @@
                 },
                 {
                     "value": 1,
-                    "text": "*"
+                    "text": "./*"
                 },
                 {
                     "value": 2,
                     "text": "modelscript"
                 }
             ],
-            "default": 0
+            "default": 1
         },
         "useocl.generation.debug": {
             "text": "Debug code generator",
