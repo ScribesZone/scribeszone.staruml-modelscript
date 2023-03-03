@@ -43,9 +43,9 @@ const ATTRIBUTE_TYPE_CONVERSIONS = {
  * Layout choice defined in preferences/preference.json
  */
 enum USEOCLLayoutKind {
-    build = 0,        // see constants in preference.json
-    inplace = 1,
-    modelscript = 2
+    build = "0",        // see constants in preference.json
+    inplace = "1",
+    modelscript = "2"
 }
 
 class USEOCLGeneratorLayout {
@@ -75,6 +75,7 @@ class USEOCLGeneratorLayout {
                     '.',
                     CL1_FILENAME)
         }
+        console.error('Invalid layout: ', this.layoutKind)
     }
 
     getSoilFilename(stateModel) {
@@ -95,6 +96,7 @@ class USEOCLGeneratorLayout {
                     '.',
                     stateModel.name) // TODO: check model name
         }
+        console.error('Invalid layout: ', this.layoutKind)
     }
 
     getUseCaseFilename(): string {
@@ -115,6 +117,7 @@ class USEOCLGeneratorLayout {
                     '.',
                     USS_FILENAME)
         }
+        console.error('Invalid layout: ', this.layoutKind)
     }
 
 }

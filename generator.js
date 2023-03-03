@@ -38,9 +38,9 @@ var ATTRIBUTE_TYPE_CONVERSIONS = {
  */
 var USEOCLLayoutKind;
 (function (USEOCLLayoutKind) {
-    USEOCLLayoutKind[USEOCLLayoutKind["build"] = 0] = "build";
-    USEOCLLayoutKind[USEOCLLayoutKind["inplace"] = 1] = "inplace";
-    USEOCLLayoutKind[USEOCLLayoutKind["modelscript"] = 2] = "modelscript";
+    USEOCLLayoutKind["build"] = "0";
+    USEOCLLayoutKind["inplace"] = "1";
+    USEOCLLayoutKind["modelscript"] = "2";
 })(USEOCLLayoutKind || (USEOCLLayoutKind = {}));
 var USEOCLGeneratorLayout = /** @class */ (function () {
     function USEOCLGeneratorLayout(layoutKind) {
@@ -57,6 +57,7 @@ var USEOCLGeneratorLayout = /** @class */ (function () {
             case USEOCLLayoutKind.inplace:
                 return (0, generators_1.getProjectBasedFilename)(CL1_EXTENSION, '.', CL1_FILENAME);
         }
+        console.error('Invalid layout: ', this.layoutKind);
     };
     USEOCLGeneratorLayout.prototype.getSoilFilename = function (stateModel) {
         switch (this.layoutKind) {
@@ -67,6 +68,7 @@ var USEOCLGeneratorLayout = /** @class */ (function () {
             case USEOCLLayoutKind.inplace:
                 return (0, generators_1.getProjectBasedFilename)(OB1_EXTENSION, '.', stateModel.name); // TODO: check model name
         }
+        console.error('Invalid layout: ', this.layoutKind);
     };
     USEOCLGeneratorLayout.prototype.getUseCaseFilename = function () {
         switch (this.layoutKind) {
@@ -77,6 +79,7 @@ var USEOCLGeneratorLayout = /** @class */ (function () {
             case USEOCLLayoutKind.inplace:
                 return (0, generators_1.getProjectBasedFilename)(USS_EXTENSION, '.', USS_FILENAME);
         }
+        console.error('Invalid layout: ', this.layoutKind);
     };
     return USEOCLGeneratorLayout;
 }());

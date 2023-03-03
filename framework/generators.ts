@@ -56,6 +56,7 @@ export function getProjectBasedFilename(
         relativeDirectory: string = '.',
         basename: string | null = null) {
     console.assert(extension[0] === ".", extension)
+    console.assert(typeof app.project.filename === "string")
     const parts = path.parse(app.project.filename)
     const fileDirectory = path.join(parts.dir, relativeDirectory)
     const fileBasename = (basename ? basename : parts.name)

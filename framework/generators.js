@@ -45,6 +45,7 @@ function getProjectBasedFilename(extension, relativeDirectory, basename) {
     if (relativeDirectory === void 0) { relativeDirectory = '.'; }
     if (basename === void 0) { basename = null; }
     console.assert(extension[0] === ".", extension);
+    console.assert(typeof app.project.filename === "string");
     var parts = path.parse(app.project.filename);
     var fileDirectory = path.join(parts.dir, relativeDirectory);
     var fileBasename = (basename ? basename : parts.name);

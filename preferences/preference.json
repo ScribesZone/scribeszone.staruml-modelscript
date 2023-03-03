@@ -12,15 +12,15 @@
             "type": "dropdown",
             "options": [
                 {
-                    "value": 0,
+                    "value": "0",
                     "text": "build/*"
                 },
                 {
-                    "value": 1,
+                    "value": "1",
                     "text": "./*"
                 },
                 {
-                    "value": 2,
+                    "value": "2",
                     "text": "modelscript"
                 }
             ],
