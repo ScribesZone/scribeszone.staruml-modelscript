@@ -43,9 +43,9 @@ const ATTRIBUTE_TYPE_CONVERSIONS = {
  * Layout choice defined in preferences/preference.json
  */
 enum USEOCLLayoutKind {
-    build = "0",        // see constants in preference.json
-    inplace = "1",
-    modelscript = "2"
+    build = "build",        // see constants in preference.json
+    inplace = "inplace",
+    modelscript = "modelscript"
 }
 
 class USEOCLGeneratorLayout {

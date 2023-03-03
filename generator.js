@@ -38,9 +38,9 @@ var ATTRIBUTE_TYPE_CONVERSIONS = {
  */
 var USEOCLLayoutKind;
 (function (USEOCLLayoutKind) {
-    USEOCLLayoutKind["build"] = "0";
-    USEOCLLayoutKind["inplace"] = "1";
-    USEOCLLayoutKind["modelscript"] = "2";
+    USEOCLLayoutKind["build"] = "build";
+    USEOCLLayoutKind["inplace"] = "inplace";
+    USEOCLLayoutKind["modelscript"] = "modelscript";
 })(USEOCLLayoutKind || (USEOCLLayoutKind = {}));
 var USEOCLGeneratorLayout = /** @class */ (function () {
     function USEOCLGeneratorLayout(layoutKind) {

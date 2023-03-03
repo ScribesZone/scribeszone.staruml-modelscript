@@ -12,19 +12,19 @@
             "type": "dropdown",
             "options": [
                 {
-                    "value": "0",
+                    "value": "build",
                     "text": "build/*"
                 },
                 {
-                    "value": "1",
+                    "value": "inplace",
                     "text": "./*"
                 },
                 {
-                    "value": "2",
+                    "value": "modelscript",
                     "text": "modelscript"
                 }
             ],
-            "default": 1
+            "default": "1"
         },
         "useocl.generation.debug": {
             "text": "Debug code generator",
