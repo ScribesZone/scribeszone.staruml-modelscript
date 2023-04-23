@@ -26,15 +26,17 @@ function looksLikeFrenchVerb3rd(word) {
         return (word==='a')
     } else {
         // According to the French conjugation all third forms
-        // of verb terminates by a or e or t.
-        return Boolean(word.match(/^[a-z]+(a|e|t)$/))
+        // of verb terminates by a or e or t or d.
+        return Boolean(word.match(/^[a-z]+(a|e|t|d)$/))
     }
 }
 
 console.assert(looksLikeFrenchVerb3rd('') === false)
 console.assert(looksLikeFrenchVerb3rd('a') === true)
 console.assert(looksLikeFrenchVerb3rd('b') === false)
+console.assert(looksLikeFrenchVerb3rd('file') === true)
 console.assert(looksLikeFrenchVerb3rd('est') === true)
+console.assert(looksLikeFrenchVerb3rd('répond') === true)
 console.assert(looksLikeFrenchVerb3rd('camembert') === true)
 console.assert(looksLikeFrenchVerb3rd('miroir') === false)
 console.assert(looksLikeFrenchVerb3rd('mir!!oir#') === false)
