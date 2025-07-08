@@ -1,4 +1,4 @@
-import { ShellCommand, ShellCommandResult } from "./shell";
+import { ShellCommand, ShellCommandResult } from ".././framework/shell";
 
 
 export abstract class AbstractProcessor {

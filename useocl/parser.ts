@@ -1,4 +1,4 @@
-import {TextMatcher, TextPattern} from "../framework/patterns";
+import {TextMatcher, TextPattern} from ".././framework/patterns";
 import {
     BlankLinePattern,
     DiscardCheckingStructurePattern,
@@ -11,7 +11,7 @@ import {
     SOILGlobalIssuePattern,
     SOILLocalizedIssuePattern,
     USEFileIssuePattern
-} from "./patterns";
+} from ".././useocl/patterns";
 import {
     AbstractAnswer, InvariantViolation, MultiplicityViolation, QueryResult,
     SOILAnswer, SOILCheckAnswer,
@@ -21,12 +21,12 @@ import {
     SOILQueryAnswer, SOILStatementAnswer,
     USEAnswer,
     USEFileIssue
-} from "./answers";
+} from ".././useocl/answers";
 import {
     SOILSectionKind
-} from "./evaluations"
+} from ".././useocl/evaluations"
 import * as path from "path";
-import {ensureNoNewLineAtEnd, indent} from "../framework/strings";
+import {ensureNoNewLineAtEnd, indent} from ".././framework/strings";
 
 const DEBUG = true
 

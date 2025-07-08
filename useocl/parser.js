@@ -16,12 +16,12 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SOILCheckAnswerParser = exports.SOILQueryAnswerParser = exports.SOILStatementAnswerParser = exports.AbstractSOILAnswerParser = exports.getAppropriateSOILParser = exports.kindOfSOILSection = exports.USEAnswerParser = void 0;
-var patterns_1 = require("../framework/patterns");
-var patterns_2 = require("./patterns");
-var answers_1 = require("./answers");
-var evaluations_1 = require("./evaluations");
+var patterns_1 = require(".././framework/patterns");
+var patterns_2 = require(".././useocl/patterns");
+var answers_1 = require(".././useocl/answers");
+var evaluations_1 = require(".././useocl/evaluations");
 var path = require("path");
-var strings_1 = require("../framework/strings");
+var strings_1 = require(".././framework/strings");
 var DEBUG = true;
 var AbstractAnswerParser = /** @class */ (function () {
     function AbstractAnswerParser(text, patterns) {

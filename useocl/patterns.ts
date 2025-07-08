@@ -1,4 +1,4 @@
-import {TextPattern, TextPatternAction} from "../framework/patterns"
+import {TextPattern, TextPatternAction} from ".././framework/patterns"
 
 //-------------------------------------------------------------------------
 //       Issues

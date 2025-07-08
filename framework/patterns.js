@@ -9,7 +9,7 @@ var TextPatternAction;
 (function (TextPatternAction) {
     TextPatternAction["replace"] = "replace";
     TextPatternAction["ignore"] = "ignore";
-})(TextPatternAction = exports.TextPatternAction || (exports.TextPatternAction = {}));
+})(TextPatternAction || (exports.TextPatternAction = TextPatternAction = {}));
 var TextMatch = /** @class */ (function () {
     function TextMatch(pattern, groups) {
         this.pattern = pattern;

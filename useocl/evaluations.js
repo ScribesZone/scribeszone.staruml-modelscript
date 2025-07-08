@@ -149,7 +149,7 @@ var SOILSectionKind;
     SOILSectionKind["query"] = "query";
     SOILSectionKind["check"] = "check";
     SOILSectionKind["comment"] = "comment";
-})(SOILSectionKind = exports.SOILSectionKind || (exports.SOILSectionKind = {}));
+})(SOILSectionKind || (exports.SOILSectionKind = SOILSectionKind = {}));
 var SOILSectionEvaluation = /** @class */ (function () {
     function SOILSectionEvaluation(soilText, stcText, index, kind, answer) {
         this.soilText = soilText;

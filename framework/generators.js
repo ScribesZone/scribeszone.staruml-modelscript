@@ -17,7 +17,7 @@ var GeneratorStatus;
     GeneratorStatus["EXCEPTION"] = "exception";
     GeneratorStatus["PRECONDITION_FAILED"] = "precondition failed";
     GeneratorStatus["UNNAMED_PROJECT"] = "";
-})(GeneratorStatus = exports.GeneratorStatus || (exports.GeneratorStatus = {}));
+})(GeneratorStatus || (exports.GeneratorStatus = GeneratorStatus = {}));
 /**
  * Helper to compute easily output file base on
  * project file using its path and basename

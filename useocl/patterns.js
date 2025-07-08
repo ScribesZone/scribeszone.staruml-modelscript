@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ALL_USEOCL_PATTERNS = exports.BlankLinePattern = exports.QueryPattern = exports.DiscardCheckingStructurePattern = exports.MultiplicityViolationPattern = exports.InvariantsSummaryPattern = exports.DiscardInvariantCheckingPattern = exports.InvariantOKPattern = exports.InvariantViolationPattern = exports.SOILGlobalIssuePattern = exports.SOILLocalizedIssuePattern = exports.USEFileIssuePattern = void 0;
-var patterns_1 = require("../framework/patterns");
+var patterns_1 = require(".././framework/patterns");
 //-------------------------------------------------------------------------
 //       Issues
 //-------------------------------------------------------------------------
